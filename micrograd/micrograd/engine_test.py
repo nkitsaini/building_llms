@@ -2,7 +2,7 @@ from pytest import approx
 
 from micrograd.engine import Value
 
-from .engine import *
+from .engine import *  # noqa: F403
 
 
 def test_grad():
@@ -59,7 +59,6 @@ def test_sub():
 
 
 def test_grad_micrograd_plan():
-
     a = Value(-4.0)
     b = Value(2.0)
     c = a + b

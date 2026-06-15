@@ -13,9 +13,12 @@ def wrap(x: NodeLike) -> "Node":
 class Node(abc.ABC):
     def __init__(self) -> None:
         self.grad: float = 0.0
+        self.label = ""
 
     def backward(self):
         self.backprop(1.0)
+
+    def children(self) -> "list[Node]": ...
 
     def backprop(self, factor: float):
         self.grad += factor
