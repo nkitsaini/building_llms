@@ -21,27 +21,44 @@ import torch
 # %%
 words = open("./makemore/names.txt").read().splitlines()
 len(words), words[:5]
+# %%
+device = torch.device(0)
+# device = torch.device('cpu')
 
 # %% Create training data
 block_size = 3
-X, Y = create_training_data(words, block_size, debug = False)
-X.shape, X.dtype, Y.shape, Y.dtype
+import random
+random.seed(42)
+random.shuffle(words)
+n1 = int(0.8 * len(words))
+n2 = int(0.9 * len(words))
+
+Xtr, Ytr = create_training_data(words[:n1], block_size, debug = False)
+Xdev, Ydev = create_training_data(words[n1:n2], block_size, debug = False)
+Xte, Yte = create_training_data(words[n2:], block_size, debug = False)
+Xtr = Xtr.to(device)
+Ytr = Ytr.to(device)
+Xdev = Xdev.to(device)
+Ydev = Ydev.to(device)
+Xte = Xte.to(device)
+Yte = Yte.to(device)
+Xtr.shape, Xtr.dtype, Ytr.shape, Ytr.dtype
 # %%
-embed_size = 2
-device = torch.device(0)
-g = torch.Generator(device).manual_seed(79783)
+
+
+# %%
+embed_size = 10
+
+g = torch.Generator(device).manual_seed(2147483647)
 C = torch.randn(27, embed_size, generator = g, requires_grad=True, device= device)
-W1 = torch.randn(block_size * embed_size, 100, generator = g, requires_grad=True, device= device)
-B1 = torch.randn(100, generator = g, requires_grad=True, device= device)
-W2 = torch.randn(100, 27, generator = g, requires_grad=True, device= device)
+W1 = torch.randn(block_size * embed_size, 200, generator = g, requires_grad=True, device= device)
+B1 = torch.randn(200, generator = g, requires_grad=True, device= device)
+W2 = torch.randn(200, 27, generator = g, requires_grad=True, device= device)
 B2 = torch.randn(27, generator = g, requires_grad=True, device= device)
 parameters = (C, W1, B1, W2, B2)
 sum(n.nelement() for n in parameters)
 
 # %%
-#
-X = X.to(device)
-Y = Y.to(device)
 def calc_logits(xs: torch.Tensor) -> torch.Tensor:
     n = len(xs)
     # xs = (n, block_size)
@@ -58,53 +75,88 @@ def calc_loss(xs: torch.Tensor, ys: torch.Tensor):
     # loss = - prob[torch.arange(n), ys].log().mean() # (n)
     # return loss
 
-for i in range(1000):
-    loss = calc_loss(X, Y)
+lossi = []
+
+# %%
+
+batch_size = 32
+
+total_loops = 50000
+total_checkpoints = 10
+lr = 0.1
+lre = torch.linspace(-3, 0, total_loops)
+lrs = 10**lre
+lri = []
+
+for i in range(total_loops):
+    minibatch_idx = torch.randint(0, Xtr.size(0), (batch_size,))
+    minibatch_x = Xtr[minibatch_idx]
+    minibatch_y = Ytr[minibatch_idx]
+    loss = calc_loss(minibatch_x, minibatch_y)
     for p in parameters:
         p.grad = None
-    if i % 50 == 0:
+    if i % (total_loops//total_checkpoints) == 0:
         print(f"[{i}]", loss)
     loss.backward()
     for p in parameters:
-        p.data -= p.grad * 0.1 # type: ignore
+        p.data -= p.grad * lr # type: ignore
+    # lri.append(lre[i].item())
+    lossi.append(loss.log10().item())
 
-
-# xenc[0]
-# xenc[0] @ C
-
-# C[0]
 # %%
-#
+plt.plot(range(0, total_loops), lossi)
+
+# %%
+calc_loss(Xtr, Ytr)
+# %%
+calc_loss(Xdev, Ydev)
+
+# %%
+
+plt.figure(figsize=(8,8))
+# C
+plt.scatter(C[:, 0].cpu().detach().numpy(), C[:, 1].cpu().detach().numpy(), s=200)
+for i in range(C.size(0)):
+    plt.text(C[i, 0].item(), C[i, 1].item(), CHARS[i], ha="center", va="center", color="white")
+plt.grid(True,which='minor')
+
+# %%
 
 def predict() -> str:
     word = START_TOKEN*block_size
     while True:
-        x = torch.tensor([char_to_int(c) for c in word[-3:]], device=device).view(1, 3) # (1, 3)
+        x = torch.tensor([char_to_int(c) for c in word[-block_size:]], device=device).view(1, block_size) # (1, 3)
         logits = calc_logits(x) # (1, 27)
         l = logits.exp()
         prob = l/l.sum(1, keepdim=True)
         y = torch.multinomial(prob, 1).item() # (1, 1)
         y_char =  CHARS[y]
         if y_char == END_TOKEN:
-            return word[3:]
+            return word[block_size:]
         word += y_char
 
 for i in range(20):
     print(predict())
+# %%
+Xtr[torch.randint(0, Xtr.size(0), (5,))]
+# xenc[0]
+# xenc[0] @ C
+
+# C[0]
 
 
 
 
 # %%
-X.shape
+Xtr.shape
 # %%
 #
-C[X].flatten(1, 2).shape
+C[Xtr].flatten(1, 2).shape
 # C[xs].unbind(1)
 
 # %%
 #
-emb = C[X].view(-1, 6)
+emb = C[Xtr].view(-1, 6)
 W1 =torch.randn(6, 100)
 B1 =torch.randn(100)
 
@@ -129,7 +181,7 @@ prob = logexp/logexp.sum(1, keepdim=True) # error
 prob.shape # (32, 27)
 prob.shape # (32, 27)
 
-mean_prob = (Y.float() @ prob).log().mean()
+mean_prob = (Ytr.float() @ prob).log().mean()
 loss = - mean_prob
 
 loss
