@@ -83,7 +83,7 @@ batch_size = 32
 
 total_loops = 50000
 total_checkpoints = 10
-lr = 0.1
+lr = 0.01
 lre = torch.linspace(-3, 0, total_loops)
 lrs = 10**lre
 lri = []
@@ -104,7 +104,7 @@ for i in range(total_loops):
     lossi.append(loss.log10().item())
 
 # %%
-plt.plot(range(0, total_loops), lossi)
+plt.plot(range(0, len(lossi)), lossi)
 
 # %%
 calc_loss(Xtr, Ytr)
@@ -130,7 +130,7 @@ def predict() -> str:
         l = logits.exp()
         prob = l/l.sum(1, keepdim=True)
         y = torch.multinomial(prob, 1).item() # (1, 1)
-        y_char =  CHARS[y]
+        y_char = CHARS[y]
         if y_char == END_TOKEN:
             return word[block_size:]
         word += y_char
