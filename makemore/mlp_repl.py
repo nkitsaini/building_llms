@@ -49,38 +49,61 @@ Xtr.shape, Xtr.dtype, Ytr.shape, Ytr.dtype
 # %%
 embed_size = 10
 
+hidden_size = 200
 g = torch.Generator(device).manual_seed(2147483647)
 C = torch.randn(27, embed_size, generator = g, device= device)
-W1 = torch.randn(block_size * embed_size, 200, generator = g,  device= device) * 0.2
-B1 = torch.randn(200, generator = g,  device= device) * 0
-W2 = torch.randn(200, 27, generator = g,  device= device) * 0.1
+W1 = torch.randn(block_size * embed_size, hidden_size, generator = g,  device= device) * 0.2
+B1 = torch.randn(hidden_size, generator = g,  device= device) * 0
+W2 = torch.randn(hidden_size, 27, generator = g,  device= device) * 0.1
 B2 = torch.randn(27, generator = g, device= device) * 0
-parameters = (C, W1, B1, W2, B2)
+bngain = torch.ones((1, hidden_size), device=device)
+bnbias = torch.zeros((1, hidden_size), device=device)
+
+bnmean_running = torch.zeros((1, hidden_size), device=device)
+bnstd_running = torch.ones((1, hidden_size), device=device)
+
+parameters = (C, W1, B1, W2, B2, bngain, bnbias)
 sum(n.nelement() for n in parameters)
 for p in parameters:
     p.requires_grad = True
 
 # %%
 track = {}
-def calc_logits(xs: torch.Tensor) -> torch.Tensor:
+def calc_logits(xs: torch.Tensor, eval: bool = False) -> torch.Tensor:
+    global bnmean_running
+    global bnstd_running
     n = len(xs)
     # xs = (n, block_size)
     # C = (n_chars, embed_size)
     xenc = C[xs] # (n, block_size, embed_size)
     xenc = xenc.view(-1, block_size * embed_size) # (n, block_size * embed_size)
     track['xenc'] = xenc
-    h1 = torch.tanh((xenc @ W1) + B1) # (n, hidden_size)
+    hpreact = (xenc @ W1) + B1
+    bnmeani = hpreact.mean(0, keepdim=True)
+    bnstdi = hpreact.std(0, keepdim=True)
+    if eval:
+        hpreact = (bngain *(hpreact - bnmean_running) / bnstd_running) + bnbias
+    else:
+        with torch.no_grad():
+            bnmean_running = 0.999 * bnmean_running + 0.001 * bnmeani
+            bnstd_running = 0.999 * bnstd_running + 0.001 * bnstdi
+        hpreact = (bngain *(hpreact - bnmeani) / bnstdi) + bnbias
+    h1 = torch.tanh(hpreact) # (n, hidden_size)
     track['h1'] = h1
     return (h1 @ W2) + B2 # (n, 27)
 
-def calc_loss(xs: torch.Tensor, ys: torch.Tensor):
-    logits = calc_logits(xs)
+def calc_loss(xs: torch.Tensor, ys: torch.Tensor, eval: bool = False):
+    logits = calc_logits(xs, eval)
     track['logits'] = logits
     return F.cross_entropy(logits, ys)
     # logexp = logits.exp()
     # prob = logexp/logexp.sum(1, keepdim=True)
     # loss = - prob[torch.arange(n), ys].log().mean() # (n)
     # return loss
+    #
+def calc_loss_eval(xs: torch.Tensor, ys: torch.Tensor):
+    with torch.no_grad():
+        return calc_loss(xs, ys, True)
 
 lossi = []
 
@@ -118,6 +141,13 @@ print(loss.item())
 plt.figure(figsize=(16, 16))
 plt.imshow(track['h1'][:30].cpu().detach() > 0.99, cmap='gray')
 
+# %%
+plt.subplot(121)
+plt.hist(B1.grad.cpu().detach());
+# plt.subplot(122)
+# plt.hist(B2.grad.cpu().detach());
+# %%
+
 # F.cross_entropy(torch.zeros((1, 27)), torch.tensor([3]))
 
 # %%
@@ -130,8 +160,8 @@ plt.plot(range(0, len(lossi)), lossi)
 """
 
 # %%
-print(f"Training Loss {calc_loss(Xtr, Ytr).item():.4f}")
-print(f"Dev Loss {calc_loss(Xdev, Ydev).item():.4f}")
+print(f"Training Loss {calc_loss_eval(Xtr, Ytr).item():.4f}")
+print(f"Dev Loss {calc_loss_eval(Xdev, Ydev).item():.4f}")
 
 # %%
 """
@@ -150,6 +180,11 @@ Run3. W1*0.2, B1*0
 
 Training Loss 2.2423
 Dev Loss 2.2614
+
+
+Run3. (Run2 + batchnorm)
+Training Loss 2.2147
+Dev Loss 2.2328
 
 """
 
