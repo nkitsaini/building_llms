@@ -50,26 +50,33 @@ Xtr.shape, Xtr.dtype, Ytr.shape, Ytr.dtype
 embed_size = 10
 
 g = torch.Generator(device).manual_seed(2147483647)
-C = torch.randn(27, embed_size, generator = g, requires_grad=True, device= device)
-W1 = torch.randn(block_size * embed_size, 200, generator = g, requires_grad=True, device= device)
-B1 = torch.randn(200, generator = g, requires_grad=True, device= device)
-W2 = torch.randn(200, 27, generator = g, requires_grad=True, device= device)
-B2 = torch.randn(27, generator = g, requires_grad=True, device= device)
+C = torch.randn(27, embed_size, generator = g, device= device)
+W1 = torch.randn(block_size * embed_size, 200, generator = g,  device= device) * 0.2
+B1 = torch.randn(200, generator = g,  device= device) * 0
+W2 = torch.randn(200, 27, generator = g,  device= device) * 0.1
+B2 = torch.randn(27, generator = g, device= device) * 0
 parameters = (C, W1, B1, W2, B2)
 sum(n.nelement() for n in parameters)
+for p in parameters:
+    p.requires_grad = True
 
 # %%
+track = {}
 def calc_logits(xs: torch.Tensor) -> torch.Tensor:
     n = len(xs)
     # xs = (n, block_size)
     # C = (n_chars, embed_size)
     xenc = C[xs] # (n, block_size, embed_size)
     xenc = xenc.view(-1, block_size * embed_size) # (n, block_size * embed_size)
+    track['xenc'] = xenc
     h1 = torch.tanh((xenc @ W1) + B1) # (n, hidden_size)
+    track['h1'] = h1
     return (h1 @ W2) + B2 # (n, 27)
 
 def calc_loss(xs: torch.Tensor, ys: torch.Tensor):
-    return F.cross_entropy(calc_logits(xs), ys)
+    logits = calc_logits(xs)
+    track['logits'] = logits
+    return F.cross_entropy(logits, ys)
     # logexp = logits.exp()
     # prob = logexp/logexp.sum(1, keepdim=True)
     # loss = - prob[torch.arange(n), ys].log().mean() # (n)
@@ -81,15 +88,16 @@ lossi = []
 
 batch_size = 32
 
-total_loops = 50000
-total_checkpoints = 10
-lr = 0.01
+total_loops = 1
+total_loops = 10_000
+# total_checkpoints = 10
+lr = 0.1
 lre = torch.linspace(-3, 0, total_loops)
 lrs = 10**lre
 lri = []
 
 for i in range(total_loops):
-    minibatch_idx = torch.randint(0, Xtr.size(0), (batch_size,))
+    minibatch_idx = torch.randint(0, Xtr.size(0), (batch_size,), generator=g, device=device)
     minibatch_x = Xtr[minibatch_idx]
     minibatch_y = Ytr[minibatch_idx]
     loss = calc_loss(minibatch_x, minibatch_y)
@@ -104,12 +112,41 @@ for i in range(total_loops):
     lossi.append(loss.log10().item())
 
 # %%
-plt.plot(range(0, len(lossi)), lossi)
+print(loss.item())
+# plt.hist(track['h1'].view(-1).cpu().detach(), bins=20);
+# plt.hist(track['logits'].view(-1).cpu().detach(), bins=20);
+plt.figure(figsize=(16, 16))
+plt.imshow(track['h1'][:30].cpu().detach() > 0.99, cmap='gray')
+
+# F.cross_entropy(torch.zeros((1, 27)), torch.tensor([3]))
 
 # %%
-calc_loss(Xtr, Ytr)
+- np.log(1/27)
+
 # %%
-calc_loss(Xdev, Ydev)
+plt.plot(range(0, len(lossi)), lossi)
+"""
+
+"""
+
+# %%
+print(f"Training Loss {calc_loss(Xtr, Ytr).item():.4f}")
+print(f"Dev Loss {calc_loss(Xdev, Ydev).item():.4f}")
+
+# %%
+"""
+Run 1. loops=10k, lr=0.1
+
+Training Loss 2.5776
+Dev Loss 2.5890
+
+
+Run 2. W2*0.1, B2*0
+
+Training Loss 2.3274
+Dev Loss 2.3553
+
+"""
 
 # %%
 
