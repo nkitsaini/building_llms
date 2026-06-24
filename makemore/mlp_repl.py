@@ -90,7 +90,7 @@ batch_size = 32
 
 total_loops = 1
 total_loops = 10_000
-# total_checkpoints = 10
+total_checkpoints = 10
 lr = 0.1
 lre = torch.linspace(-3, 0, total_loops)
 lrs = 10**lre
@@ -145,6 +145,11 @@ Run 2. W2*0.1, B2*0
 
 Training Loss 2.3274
 Dev Loss 2.3553
+
+Run3. W1*0.2, B1*0
+
+Training Loss 2.2423
+Dev Loss 2.2614
 
 """
 
