@@ -5,13 +5,15 @@ requires-python = ">=3.14"
 dependencies = [
 	"makemore",
 	"matplotlib>=3.11.0",
-    "numpy>=2.4.6",
+	"numpy>=2.4.6",
+	"tqdm>=4.68.3",
 ]
 
 [dependency-groups]
 dev = [
     "ipykernel>=7.3.0",
     "pytest>=9.1.0",
+    "ruff>=0.15.20",
 ]
 
 [tool.uv.sources]

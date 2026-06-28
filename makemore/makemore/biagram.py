@@ -1,5 +1,6 @@
 import string
 
+from pathlib import Path
 import torch
 
 START_TOKEN = "."
@@ -7,6 +8,9 @@ END_TOKEN = "."
 
 CHARS = [START_TOKEN, *string.ascii_lowercase]
 
+
+def read_words() -> list[str]:
+    return (Path(__file__).parent.parent/'names.txt').read_text().splitlines()
 
 def create_count_tensor(words: list[str]) -> torch.Tensor:
     counts = torch.zeros(len(CHARS), len(CHARS), dtype=torch.int)

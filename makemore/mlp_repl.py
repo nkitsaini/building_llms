@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch.nn.functional as F
 from collections.abc import Sequence
-from makemore.biagram import CHARS, END_TOKEN, START_TOKEN, char_to_int, create_count_tensor, create_training_data
+from makemore.biagram import CHARS, END_TOKEN, START_TOKEN, char_to_int, create_count_tensor, create_training_data, read_words
 %matplotlib inline
 
 import numpy as np
@@ -19,7 +19,7 @@ import numpy as np
 import torch
 
 # %%
-words = open("./makemore/names.txt").read().splitlines()
+words = read_words()
 len(words), words[:5]
 # %%
 device = torch.device(0)
