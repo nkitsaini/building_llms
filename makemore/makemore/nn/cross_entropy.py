@@ -3,6 +3,7 @@ import torch
 import torch.nn
 import torch.nn.functional as F
 
+
 def cross_entropy(x: torch.Tensor, ypred: torch.Tensor) -> torch.Tensor:
     """
     logits.shape = [*ypred.shape, N]
@@ -10,13 +11,11 @@ def cross_entropy(x: torch.Tensor, ypred: torch.Tensor) -> torch.Tensor:
     """
     x = x - x.max()
     xexp = x.exp()
-    probs = xexp/xexp.sum(-1, keepdim=True)
+    probs = xexp / xexp.sum(-1, keepdim=True)
     pred_probs = probs[torch.arange(0, len(ypred)), ypred]
     pred_prob_logs = pred_probs.log()
     loss = pred_prob_logs.mean().neg()
     return loss
 
 
-
-def test_cross_entropy():
-    ...
+def test_cross_entropy(): ...

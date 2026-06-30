@@ -10,7 +10,8 @@ CHARS = [START_TOKEN, *string.ascii_lowercase]
 
 
 def read_words() -> list[str]:
-    return (Path(__file__).parent.parent/'names.txt').read_text().splitlines()
+    return (Path(__file__).parent.parent / "names.txt").read_text().splitlines()
+
 
 def create_count_tensor(words: list[str]) -> torch.Tensor:
     counts = torch.zeros(len(CHARS), len(CHARS), dtype=torch.int)
@@ -20,17 +21,20 @@ def create_count_tensor(words: list[str]) -> torch.Tensor:
             counts[char_to_int(c1), char_to_int(c2)] += 1
     return counts
 
-def create_training_data(words: list[str], block_size: int = 1, debug: bool = False) -> tuple[torch.Tensor, torch.Tensor]:
+
+def create_training_data(
+    words: list[str], block_size: int = 1, debug: bool = False
+) -> tuple[torch.Tensor, torch.Tensor]:
     xs = []
     ys = []
     for word in words:
-        padding =  [START_TOKEN]*block_size
+        padding = [START_TOKEN] * block_size
         chars = [*padding, *word, END_TOKEN]
         if debug:
             print(word)
         for i in range(len(word) + 1):
-            x_char = chars[i:i+block_size]
-            y_char = chars[i+block_size]
+            x_char = chars[i : i + block_size]
+            y_char = chars[i + block_size]
             if debug:
                 print(f"{''.join(x_char)} ---> {y_char}")
             x = [char_to_int(c) for c in x_char]
