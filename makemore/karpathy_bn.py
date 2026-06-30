@@ -275,31 +275,31 @@ n_hidden = 100 # the number of neurons in the hidden layer of the MLP
 g = torch.Generator().manual_seed(2147483647) # for reproducibility
 
 C = torch.randn((vocab_size, n_embd),            generator=g)
-# layers = [
-#   Linear(n_embd * block_size, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
-#   Linear(           n_hidden, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
-#   Linear(           n_hidden, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
-#   Linear(           n_hidden, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
-#   Linear(           n_hidden, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
-#   Linear(           n_hidden, vocab_size, bias=False), BatchNorm1d(vocab_size),
-# ]
 layers = [
-  Linear(n_embd * block_size, n_hidden), Tanh(),
-  Linear(           n_hidden, n_hidden), Tanh(),
-  Linear(           n_hidden, n_hidden), Tanh(),
-  Linear(           n_hidden, n_hidden), Tanh(),
-  Linear(           n_hidden, n_hidden), Tanh(),
-  Linear(           n_hidden, vocab_size),
+  Linear(n_embd * block_size, n_hidden,), BatchNorm1d(n_hidden), Tanh(),
+  Linear(           n_hidden, n_hidden,), BatchNorm1d(n_hidden), Tanh(),
+  Linear(           n_hidden, n_hidden,), BatchNorm1d(n_hidden), Tanh(),
+  Linear(           n_hidden, n_hidden,), BatchNorm1d(n_hidden), Tanh(),
+  Linear(           n_hidden, n_hidden,), BatchNorm1d(n_hidden), Tanh(),
+  Linear(           n_hidden, vocab_size), BatchNorm1d(vocab_size),
 ]
+# layers = [
+#   Linear(n_embd * block_size, n_hidden), Tanh(),
+#   Linear(           n_hidden, n_hidden), Tanh(),
+#   Linear(           n_hidden, n_hidden), Tanh(),
+#   Linear(           n_hidden, n_hidden), Tanh(),
+#   Linear(           n_hidden, n_hidden), Tanh(),
+#   Linear(           n_hidden, vocab_size),
+# ]
 
 with torch.no_grad():
   # last layer: make less confident
-  # layers[-1].gamma *= 0.1
-  layers[-1].weight *= 0.1
+  layers[-1].gamma *= 0.1
+  # layers[-1].weight *= 0.1
   # all other layers: apply gain
   for layer in layers[:-1]:
     if isinstance(layer, Linear):
-      layer.weight *= 1.0 #5/3
+      layer.weight *= 0.2 #5/3
 
 parameters = [C] + [p for layer in layers for p in layer.parameters()]
 print(sum(p.nelement() for p in parameters)) # number of parameters in total
@@ -346,7 +346,6 @@ for i in range(max_steps):
   with torch.no_grad():
     ud.append([((lr*p.grad).std() / p.data.std()).log10().item() for p in parameters])
 
-  break
   if i >= 1000:
     break # AFTER_DEBUG: would take out obviously to run full optimization
 

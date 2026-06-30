@@ -72,27 +72,32 @@ C = torch.randn(
     len(CHARS), embed_size, generator=g
 )  # ; Linear(len(CHARS), embed_size, generator=g)
 layers = [
-    Linear(block_size * embed_size, hidden_size),
+    Linear(block_size * embed_size, hidden_size, bias=False),
+    BatchNorm(hidden_size),
     Tanh(),
-    Linear(hidden_size, hidden_size),
+    Linear(hidden_size, hidden_size, bias=False),
+    BatchNorm(hidden_size),
     Tanh(),
-    Linear(hidden_size, hidden_size),
+    Linear(hidden_size, hidden_size, bias=False),
+    BatchNorm(hidden_size),
     Tanh(),
-    Linear(hidden_size, hidden_size),
+    Linear(hidden_size, hidden_size, bias=False),
+    BatchNorm(hidden_size),
     Tanh(),
-    Linear(hidden_size, hidden_size),
+    Linear(hidden_size, hidden_size, bias=False),
+    BatchNorm(hidden_size),
     Tanh(),
-    Linear(hidden_size, len(CHARS)),
+    Linear(hidden_size, len(CHARS), bias=False),
+    BatchNorm(len(CHARS)),
 ]
 
 with torch.no_grad():
-    assert isinstance(layers[-1], Linear)
-    print(f"mean: {layers[-1].w.mean():.4e} std: {layers[-1].w.std():.4e}")
-    layers[-1].w *= 0.1
-    print(f"mean: {layers[-1].w.mean():.4e} std: {layers[-1].w.std():.4e}")
+    # assert isinstance(layers[-1], Linear)
+    assert isinstance(layers[-1], BatchNorm)
+    layers[-1].gamma *= 0.1
     for l in layers[:-1]:
         if isinstance(l, Linear):
-            l.w *= 5/3
+            l.w *= 1
 
 parameters = [C] +  [p for l in layers for p in l.parameters()]
 for p in parameters:
@@ -102,7 +107,7 @@ print(sum(p.nelement() for p in parameters))
 # %%
 
 
-def forward(x: torch.Tensor, y: torch.Tensor, training: bool = False):
+def forward(x: torch.Tensor, y: torch.Tensor, training: bool = True):
     xenc = C[x].view(x.size(0), -1)  # (n, 3 * 27)
     ypred = xenc
     for p in layers:
@@ -168,6 +173,8 @@ for i, l in enumerate(layers):
     hy, hx = torch.histogram(l.out, density=True)
     plt.plot(hx[:-1].cpu().detach(), hy.cpu().detach())
     legends.append(f'layer {i}')
+
+
 plt.legend(legends)
 
 # %% Visualize tanh grads
@@ -203,8 +210,6 @@ for i, p in enumerate(parameters):
     print(
         f"Layer {i:>2} ({l.__class__.__name__:>10}): mean {mean:>12.7f} | std {std:.8f}| grad:data ratio {(std/p.std()).item():>13e}"  #  | grad:data ratio (mean) {(mean/p.mean()).item():>13e}"
     )
-    print(f"data mean:{p.data.mean():.4e} data std: {p.data.std():.4e}")
-    print(f"data mean:{p.mean():.4e} data std: {p.std():.4e}")
     hy, hx = torch.histogram(t, density=True)
     plt.plot(hx[:-1].cpu().detach(), hy.cpu().detach())
     legends.append(f'layer {i}')
