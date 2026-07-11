@@ -13,8 +13,11 @@ class BatchNorm(Model):
         self.eps = eps
         self.momentum = momentum
         self.training = True
+        self.x = None
+        self.result = None
 
     def __call__(self, x: torch.Tensor):
+        self.x = x
         if self.training:
             # NB: dim=0 means we want to calculate per "neuron", not per sample
             mean = x.mean(0, keepdim=True)
@@ -31,8 +34,24 @@ class BatchNorm(Model):
             var = self.running_var
 
         result = (x - mean) / ((var + self.eps) ** 0.5)
+        self.result = result
         self.out = result * self.gamma + self.beta
         return self.out
+
+    # (in_feat, )
+    def backprop(self, out_grad: torch.Tensor) -> torch.Tensor:
+        # TODO
+        raise NotImplementedError()
+        # assert self.result is not None
+        # assert self.x is not None
+        # with torch.no_grad():
+        #     self.init_grads()
+        #     self.beta.grad += out_grad # type: ignore
+        #     self.gamma.grad += self.result.sum(0) * out_grad # type: ignore
+        #     ...
+
+    def init_grad(self):
+        raise NotImplementedError()
 
     def parameters(self) -> list[torch.Tensor]:
         return [self.gamma, self.beta]

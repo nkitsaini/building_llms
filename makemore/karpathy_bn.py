@@ -246,6 +246,23 @@ class BatchNorm1d:
   def __call__(self, x):
     # calculate the forward pass
     if self.training:
+      """
+      num_samples = x.size(0)
+      sum_over_neurons = x.T @ torch.ones((num_samples, 1)) # shape = (neurons, 1)
+      # broadcast into (num_samples, neurons)
+      mean = (sum_over_neurons @ torch.ones((1, num_samples))).T # shape = (samples, neurons)
+
+
+      ns = x.size(0)
+      mean =  (x.T @ ones(ns, 1)) @ ones(1, ns)
+      mean =  ((x.T @ ones(ns, 1)) @ ones(1, ns)).T
+      mean =  ones(1, ns).T @ ((x.T @ ones(ns, 1)).T
+      mean =  ones(ns, 1) @ ((ones(ns, 1).T @ x)
+      mean =  ones(ns, 1) @ ((ones(1, ns) @ x)
+
+      """
+
+      # x.T @ torch.ones((x.size(0)))
       xmean = x.mean(0, keepdim=True) # batch mean
       xvar = x.var(0, keepdim=True) # batch variance
     else:

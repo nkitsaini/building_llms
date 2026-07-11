@@ -10,3 +10,6 @@ class Model(abc.ABC):
 
     @abc.abstractmethod
     def parameters(self) -> list[torch.Tensor]: ...
+
+    @abc.abstractmethod
+    def backprop(self, out_grad: torch.Tensor) -> torch.Tensor: ...

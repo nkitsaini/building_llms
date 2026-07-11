@@ -12,10 +12,14 @@ def cross_entropy(x: torch.Tensor, ypred: torch.Tensor) -> torch.Tensor:
     x = x - x.max()
     xexp = x.exp()
     probs = xexp / xexp.sum(-1, keepdim=True)
-    pred_probs = probs[torch.arange(0, len(ypred)), ypred]
-    pred_prob_logs = pred_probs.log()
+    prob_logs = probs.log()
+    pred_prob_logs = prob_logs[torch.arange(0, len(ypred)), ypred]
     loss = pred_prob_logs.mean().neg()
     return loss
 
 
-def test_cross_entropy(): ...
+def backprop_cross_entropy(out_grad: float = 1.):
+    # TODO
+    raise NotImplementedError()
+    # dpred_prob_logs = torch.ones_like() -out_grad * 1/torch.
+    ...
