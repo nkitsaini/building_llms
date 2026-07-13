@@ -18,7 +18,7 @@ def cross_entropy(x: torch.Tensor, ypred: torch.Tensor) -> torch.Tensor:
     return loss
 
 
-def backprop_cross_entropy(out_grad: float = 1.):
+def backprop_cross_entropy(out_grad: float = 1.0):
     # TODO
     raise NotImplementedError()
     # dpred_prob_logs = torch.ones_like() -out_grad * 1/torch.

@@ -7,6 +7,7 @@ START_TOKEN = "."
 END_TOKEN = "."
 
 CHARS = [START_TOKEN, *string.ascii_lowercase]
+vocab_size = len(CHARS)
 
 
 def read_words() -> list[str]:

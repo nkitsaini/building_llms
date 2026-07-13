@@ -12,7 +12,9 @@ class Linear(Model):
         bias: bool = True,
         generator: torch.Generator = torch.default_generator,
     ):
-        self.w = torch.randn((in_feat, out_feat), generator=generator) / (math.sqrt(in_feat))
+        self.w = torch.randn((in_feat, out_feat), generator=generator) / (
+            math.sqrt(in_feat)
+        )
         self.b = torch.zeros(out_feat) if bias else None
         self.wgrad = None
         self.bgrad = None
@@ -21,7 +23,7 @@ class Linear(Model):
 
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
         self.x = x
-        self.out = (x @ self.w)
+        self.out = x @ self.w
         if self.b is not None:
             self.out += self.b
         return self.out

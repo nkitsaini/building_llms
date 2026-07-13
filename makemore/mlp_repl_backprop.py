@@ -66,7 +66,6 @@ Xtr.shape, Xtr.dtype, Ytr.shape, Ytr.dtype
 embed_size = 10
 
 
-
 def generate_model():
     g = torch.Generator(device).manual_seed(2147483649)
     hidden_size = 100
@@ -93,6 +92,7 @@ def generate_model():
         BatchNorm(len(CHARS)),
     ]
 
+
 C, layers = generate_model()
 
 with torch.no_grad():
@@ -103,7 +103,7 @@ with torch.no_grad():
         if isinstance(l, Linear):
             l.w *= 1
 
-parameters = [C] +  [p for l in layers for p in l.parameters()]
+parameters = [C] + [p for l in layers for p in l.parameters()]
 for p in parameters:
     p.requires_grad = True
 print(list(p.nelement() for p in parameters))
@@ -136,6 +136,8 @@ losses = []
 
 
 ud = []
+
+
 def train(xs: torch.Tensor, ys: torch.Tensor, batch_size: int = 32, loops: int = 10000):
     assert len(xs) == len(ys)
     for loop_num in tqdm(range(loops)):
@@ -149,7 +151,9 @@ def train(xs: torch.Tensor, ys: torch.Tensor, batch_size: int = 32, loops: int =
         lr = 1e-1
         backprop(loss, lr)
         with torch.no_grad():
-            ud.append([(lr*p.grad.std()/ p.data.std()).log10().item() for p in parameters])
+            ud.append(
+                [(lr * p.grad.std() / p.data.std()).log10().item() for p in parameters]
+            )
         if loop_num > 1000:
             break
 
@@ -176,7 +180,7 @@ for i, l in enumerate(layers):
     )
     hy, hx = torch.histogram(l.out, density=True)
     plt.plot(hx[:-1].cpu().detach(), hy.cpu().detach())
-    legends.append(f'layer {i}')
+    legends.append(f"layer {i}")
 
 
 plt.legend(legends)
@@ -188,16 +192,14 @@ legends = []
 for i, l in enumerate(layers):
     if not isinstance(l, Tanh):
         continue
-    t= l.out.grad
+    t = l.out.grad
     assert isinstance(t, torch.Tensor)
     mean = t.mean()
     std = t.std()
-    print(
-        f"Layer {i} ({l.__class__.__name__:>10}): mean {mean:>12.8f}, std {std:.8f}"
-    )
+    print(f"Layer {i} ({l.__class__.__name__:>10}): mean {mean:>12.8f}, std {std:.8f}")
     hy, hx = torch.histogram(t, density=True)
     plt.plot(hx[:-1].cpu().detach(), hy.cpu().detach())
-    legends.append(f'layer {i}')
+    legends.append(f"layer {i}")
 plt.legend(legends)
 
 # %% Weight / Grad ratio
@@ -208,15 +210,15 @@ for i, p in enumerate(parameters):
     if p.ndim != 2:
         continue
     assert p.grad is not None
-    t= p.grad #/p.data
+    t = p.grad  # /p.data
     mean = t.mean()
     std = t.std()
     print(
-        f"Layer {i:>2} ({l.__class__.__name__:>10}): mean {mean:>12.7f} | std {std:.8f}| grad:data ratio {(std/p.std()).item():>13e}"  #  | grad:data ratio (mean) {(mean/p.mean()).item():>13e}"
+        f"Layer {i:>2} ({l.__class__.__name__:>10}): mean {mean:>12.7f} | std {std:.8f}| grad:data ratio {(std / p.std()).item():>13e}"  #  | grad:data ratio (mean) {(mean/p.mean()).item():>13e}"
     )
     hy, hx = torch.histogram(t, density=True)
     plt.plot(hx[:-1].cpu().detach(), hy.cpu().detach())
-    legends.append(f'layer {i}')
+    legends.append(f"layer {i}")
 plt.legend(legends)
 
 # %% visualize lr * grad.std/data.std for each parameter over time
@@ -226,7 +228,7 @@ for i, p in enumerate(parameters):
     if p.ndim != 2:
         continue
     plt.plot([ud[j][i] for j in range(len(ud))])
-plt.plot([0, len(ud)], [-3, -3], 'k')
+plt.plot([0, len(ud)], [-3, -3], "k")
 
 # %%
 print(f"Train loss {forward(Xtr, Ytr, False):.4f}")

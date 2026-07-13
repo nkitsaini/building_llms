@@ -18,6 +18,7 @@ import torch.nn.functional as F
 from collections.abc import Sequence
 from makemore.biagram import (
     CHARS,
+    vocab_size,
     END_TOKEN,
     START_TOKEN,
     char_to_int,
@@ -25,7 +26,16 @@ from makemore.biagram import (
     create_training_data,
     read_words,
 )
-from makemore.nn import cross_entropy, Linear, Model, Tanh, BatchNorm
+from makemore.nn import (
+    cross_entropy,
+    Linear,
+    Model,
+    Tanh,
+    BatchNorm,
+    Embedding,
+    FlattenConsecutive,
+    Sequential,
+)
 
 _ip.run_line_magic("matplotlib", "inline")
 
@@ -41,7 +51,7 @@ len(words), words[:5]
 device = torch.device("cpu")
 
 # %% Create training data
-block_size = 3
+block_size = 8
 import random
 
 random.seed(42)
@@ -59,71 +69,68 @@ Ydev = Ydev.to(device)
 Xte = Xte.to(device)
 Yte = Yte.to(device)
 Xtr.shape, Xtr.dtype, Ytr.shape, Ytr.dtype
+
 # %%
 
+sample_size = 5
+for x, y in zip(Xtr[:sample_size], Ytr[:sample_size]):
+    print("".join([CHARS[int(i.item())] for i in x]), "--> ", CHARS[y.item()])
 
 # %%
 embed_size = 10
 
 g = torch.Generator(device).manual_seed(2147483649)
 
-hidden_size = 100
-C = torch.randn(
-    len(CHARS), embed_size, generator=g
-)  # ; Linear(len(CHARS), embed_size, generator=g)
-layers = [
-    Linear(block_size * embed_size, hidden_size, bias=False),
+hidden_size = 200
+# C = torch.randn(
+#     len(CHARS), embed_size, generator=g
+# )  # ; Linear(len(CHARS), embed_size, generator=g)
+model = Sequential([
+    Embedding(vocab_size, embed_size, generator=g),
+
+    FlattenConsecutive(2),
+    Linear(2 * embed_size, hidden_size, bias=False),
     BatchNorm(hidden_size),
     Tanh(),
-    Linear(hidden_size, hidden_size, bias=False),
+    # batch_size, vocab_size/2 = 4, hidden_size
+    #
+    FlattenConsecutive(2),
+    Linear(2 * hidden_size, embed_size, bias=False),
     BatchNorm(hidden_size),
     Tanh(),
-    Linear(hidden_size, hidden_size, bias=False),
+
+    FlattenConsecutive(2),
+    Linear(2 * embed_size, hidden_size, bias=False),
     BatchNorm(hidden_size),
     Tanh(),
-    Linear(hidden_size, hidden_size, bias=False),
-    BatchNorm(hidden_size),
-    Tanh(),
-    Linear(hidden_size, hidden_size, bias=False),
-    BatchNorm(hidden_size),
-    Tanh(),
-    Linear(hidden_size, len(CHARS), bias=False),
-    BatchNorm(len(CHARS)),
-]
+
+
+    Linear(hidden_size, vocab_size, bias=False),
+])
 
 with torch.no_grad():
-    # assert isinstance(layers[-1], Linear)
-    assert isinstance(layers[-1], BatchNorm)
-    layers[-1].gamma *= 0.1
-    for l in layers[:-1]:
-        if isinstance(l, Linear):
-            l.w *= 1
+    model.layers[-1].w *= 0.1  # ty:ignore[unresolved-attribute]
 
-parameters = [C] +  [p for l in layers for p in l.parameters()]
-for p in parameters:
+for p in model.parameters():
     p.requires_grad = True
-print(list(p.nelement() for p in parameters))
-print(sum(p.nelement() for p in parameters))
+print(sum(p.nelement() for p in model.parameters()))
 # %%
 
 
 def forward(x: torch.Tensor, y: torch.Tensor, training: bool = True):
-    xenc = C[x].view(x.size(0), -1)  # (n, 3 * 27)
-    ypred = xenc
-    for p in layers:
-        p.training = training
-        ypred = p(ypred)
+    model.set_training(training)
+    ypred = model(x)
     loss = cross_entropy(ypred, y)
     return loss
 
 
 def backprop(loss: torch.Tensor, lr: float = 1e-1):
-    for l in layers:
-        l.out.retain_grad()
-    for p in parameters:
+    for l in model.layers:
+        l.out.retain_grad()  # ty:ignore[unresolved-attribute]
+    for p in model.parameters():
         p.grad = None
     loss.backward()
-    for p in parameters:
+    for p in model.parameters():
         assert p.grad is not None
         p.data -= p.grad * lr
 
@@ -132,6 +139,8 @@ losses = []
 
 
 ud = []
+
+
 def train(xs: torch.Tensor, ys: torch.Tensor, batch_size: int = 32, loops: int = 10000):
     assert len(xs) == len(ys)
     for loop_num in tqdm(range(loops)):
@@ -142,91 +151,25 @@ def train(xs: torch.Tensor, ys: torch.Tensor, batch_size: int = 32, loops: int =
         if loop_num < 10:
             print(loss.item())
         losses.append(loss.item())
-        lr = 1e-1
+        lr = 1e-1 if loop_num < 150000 else 0.01
         backprop(loss, lr)
-        with torch.no_grad():
-            ud.append([(lr*p.grad.std()/ p.data.std()).log10().item() for p in parameters])
-        if loop_num > 1000:
-            break
 
 
 # %%
 losses = []
-train(Xtr, Ytr)
+# train(Xtr, Ytr, loops=200000)
+train(Xtr, Ytr, loops=1)
 
 # %%
-plt.plot(losses)
-losses[:5], losses[-5:]
-# %% Visualize tanh outputs
-
-plt.figure(figsize=(20, 4))
-legends = []
-for i, l in enumerate(layers):
-    if not isinstance(l, Tanh):
-        continue
-    mean = l.out.mean()
-    std = l.out.std()
-    saturation = 100 * (l.out.abs() > 0.97).sum() / l.out.nelement()
-    print(
-        f"Layer {i} ({l.__class__.__name__:>10}): mean {mean:>5.2f}, std {std:.2f}, saturation {saturation:>6.2f}%"
-    )
-    hy, hx = torch.histogram(l.out, density=True)
-    plt.plot(hx[:-1].cpu().detach(), hy.cpu().detach())
-    legends.append(f'layer {i}')
-
-
-plt.legend(legends)
-
-# %% Visualize tanh grads
-
-plt.figure(figsize=(20, 4))
-legends = []
-for i, l in enumerate(layers):
-    if not isinstance(l, Tanh):
-        continue
-    t= l.out.grad
-    assert isinstance(t, torch.Tensor)
-    mean = t.mean()
-    std = t.std()
-    print(
-        f"Layer {i} ({l.__class__.__name__:>10}): mean {mean:>12.8f}, std {std:.8f}"
-    )
-    hy, hx = torch.histogram(t, density=True)
-    plt.plot(hx[:-1].cpu().detach(), hy.cpu().detach())
-    legends.append(f'layer {i}')
-plt.legend(legends)
-
-# %% Weight / Grad ratio
-
-plt.figure(figsize=(20, 4))
-legends = []
-for i, p in enumerate(parameters):
-    if p.ndim != 2:
-        continue
-    assert p.grad is not None
-    t= p.grad #/p.data
-    mean = t.mean()
-    std = t.std()
-    print(
-        f"Layer {i:>2} ({l.__class__.__name__:>10}): mean {mean:>12.7f} | std {std:.8f}| grad:data ratio {(std/p.std()).item():>13e}"  #  | grad:data ratio (mean) {(mean/p.mean()).item():>13e}"
-    )
-    hy, hx = torch.histogram(t, density=True)
-    plt.plot(hx[:-1].cpu().detach(), hy.cpu().detach())
-    legends.append(f'layer {i}')
-plt.legend(legends)
-
-# %% visualize lr * grad.std/data.std for each parameter over time
-
-plt.figure(figsize=(20, 4))
-for i, p in enumerate(parameters):
-    if p.ndim != 2:
-        continue
-    plt.plot([ud[j][i] for j in range(len(ud))])
-plt.plot([0, len(ud)], [-3, -3], 'k')
-
+plt.plot(torch.tensor(losses).view(-1, 1000).sum(1))
+losses[:2], losses[-2:]
 # %%
-print(f"Train loss {forward(Xtr, Ytr, False):.4f}")
-print(f"Train loss {forward(Xdev, Ydev, False):.4f}")
+
+with torch.no_grad():
+    loss = forward(Xtr, Ytr, training=False)
+    print("Train loss", loss)
+    loss = forward(Xdev, Ydev, training=False)
+    print("Validation loss", loss)
 
 # %%
 
@@ -235,11 +178,8 @@ def predict_words():
     word = "." * block_size
     while True:
         x = torch.tensor([[char_to_int(x) for x in word[-3:]]])  # (1, 3)
-        xenc = C[x].view(x.size(0), -1)  # (n, 3 * 27)
-        ypred = xenc
-        for p in layers:
-            p.training = False
-            ypred = p(ypred)
+        model.set_training(False)
+        ypred = model(x)
         ypred -= ypred.max()
         yprob = ypred.exp()
         yprob = yprob / yprob.sum(1, keepdim=True)

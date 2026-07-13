@@ -16,8 +16,8 @@ class Tanh(Model):
     def backprop(self, out_grad: torch.Tensor) -> torch.Tensor:
         assert self.x is not None
         with torch.no_grad():
-            x_exp = (2*self.x).exp()
-            return (4*x_exp)/((x_exp +1)**2) * out_grad
+            x_exp = (2 * self.x).exp()
+            return (4 * x_exp) / ((x_exp + 1) ** 2) * out_grad
             # return xgrad = (1 - self.out**2)  * out_grad
 
     def parameters(self) -> list[torch.Tensor]:
