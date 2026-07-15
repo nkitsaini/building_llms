@@ -17,11 +17,15 @@ class BatchNorm(Model):
         self.result = None
 
     def __call__(self, x: torch.Tensor):
+        x_dims = len(x.shape)
+        # Include all the batches i.e. if input is (batch_count, sub_batch_count, ..., neurons)
+        # Then for all neurons calculate mean. Use dims for (batch_count, sub_batch_count, ...)
+        calc_dim = tuple(range(x_dims-1))
         self.x = x
         if self.training:
             # NB: dim=0 means we want to calculate per "neuron", not per sample
-            mean = x.mean(0, keepdim=True)
-            var = x.var(0, keepdim=True)
+            mean = x.mean(calc_dim, keepdim=True)
+            var = x.var(calc_dim, keepdim=True)
             with torch.no_grad():
                 self.running_mean = (
                     1 - self.momentum

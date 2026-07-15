@@ -77,11 +77,11 @@ for x, y in zip(Xtr[:sample_size], Ytr[:sample_size]):
     print("".join([CHARS[int(i.item())] for i in x]), "--> ", CHARS[y.item()])
 
 # %%
-embed_size = 10
+embed_size = 32
 
 g = torch.Generator(device).manual_seed(2147483649)
 
-hidden_size = 200
+hidden_size = 68
 # C = torch.randn(
 #     len(CHARS), embed_size, generator=g
 # )  # ; Linear(len(CHARS), embed_size, generator=g)
@@ -95,15 +95,17 @@ model = Sequential([
     # batch_size, vocab_size/2 = 4, hidden_size
     #
     FlattenConsecutive(2),
-    Linear(2 * hidden_size, embed_size, bias=False),
+    Linear(2 * hidden_size, hidden_size, bias=False),
     BatchNorm(hidden_size),
     Tanh(),
+    # batch_size, vocab_size/2 = 2, hidden_size
 
     FlattenConsecutive(2),
-    Linear(2 * embed_size, hidden_size, bias=False),
+    Linear(2 * hidden_size, hidden_size, bias=False),
     BatchNorm(hidden_size),
     Tanh(),
 
+    # batch_size, hidden_size
 
     Linear(hidden_size, vocab_size, bias=False),
 ])
@@ -116,10 +118,12 @@ for p in model.parameters():
 print(sum(p.nelement() for p in model.parameters()))
 # %%
 
+# compiled_model = torch.compile(model)
 
 def forward(x: torch.Tensor, y: torch.Tensor, training: bool = True):
     model.set_training(training)
     ypred = model(x)
+    # ypred = compiled_model(x)
     loss = cross_entropy(ypred, y)
     return loss
 
@@ -154,11 +158,18 @@ def train(xs: torch.Tensor, ys: torch.Tensor, batch_size: int = 32, loops: int =
         lr = 1e-1 if loop_num < 150000 else 0.01
         backprop(loss, lr)
 
-
 # %%
 losses = []
-# train(Xtr, Ytr, loops=200000)
-train(Xtr, Ytr, loops=1)
+train(Xtr, Ytr, loops=200000)
+# train(Xtr, Ytr, loops=1)
+#
+"""
+See loss with batchnorm fix.
+Previously ~1.93 on train and ~2.0 on test
+
+
+"""
+# %%
 
 # %%
 plt.plot(torch.tensor(losses).view(-1, 1000).sum(1))
