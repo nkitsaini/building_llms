@@ -69,26 +69,46 @@ class BiagramManualSeed(nn.Module):
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
 
-m = BiagramManualSeed(ds.vocab_size)
-m = m.to(device)
+model = BiagramManualSeed(ds.vocab_size)
+model = model.to(device)
 
-m(*ds.get_batch('train'))
+model(*ds.get_batch('train'))
+
+# %%
+@torch.no_grad()
+def estimate_loss(eval_iters: int = 20):
+    out = {}
+    model.eval()
+    for split in ['train', 'val']:
+        losses = torch.zeros(eval_iters)
+        for i in range(eval_iters):
+            x, y = ds.get_batch(split)
+            _, loss = model(x, y)
+            losses[i] = loss.item()
+        out[split] = losses.mean()
+    model.train()
+    return out
+
+# %%
 
 idx = torch.zeros((1, 1)).long()
-l = m.generate(idx, 100)[0]
+l = model.generate(idx, 100)[0]
 print(ds.decode(l.tolist()))
 
 # %%
-optimizer = torch.optim.AdamW(m.parameters(), lr=1e-3)
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
 
 batch_size = 32
 for i in tqdm(range(10000)):
     x, y = ds.get_batch('train')
-    logits, loss = m(x, y)
+    logits, loss = model(x, y)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
+    if i % 500 == 0:
+        tqdm.write(str(estimate_loss()) + "\n")
+
 print(loss.item())
 
 
-print(ds.decode(m.generate(torch.zeros((1, 1)).long(), 100)[0].tolist()))
+print(ds.decode(model.generate(torch.zeros((1, 1)).long(), 100)[0].tolist()))
