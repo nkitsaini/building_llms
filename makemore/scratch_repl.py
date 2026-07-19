@@ -34,6 +34,7 @@ M
 # %%
 
 # avg
+#
 torch.allclose(M@x, avg)
 diff = torch.abs(M @ x - avg).max()
 diff
