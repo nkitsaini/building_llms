@@ -4,7 +4,7 @@ import torch
 
 # %%
 torch.manual_seed(1337)
-B, T, C =4,8,2
+B, T, C = 4, 8, 2
 
 x = torch.randn(B, T, C)
 x.shape
@@ -15,7 +15,7 @@ x
 
 avg = torch.zeros_like(x)
 for i in range(T):
-    avg[:, i, :] = x[:, :i+1, :].mean(1)
+    avg[:, i, :] = x[:, : i + 1, :].mean(1)
 # for b in range(B):
 #     for i in range(T):
 #         avg[b, i] = x[b, :i+1].mean(0, keepdim=True)
@@ -35,7 +35,7 @@ M
 
 # avg
 #
-torch.allclose(M@x, avg)
+torch.allclose(M @ x, avg)
 diff = torch.abs(M @ x - avg).max()
 diff
 # M @ x

@@ -1,0 +1,16 @@
+[project]
+name = "tokenizer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "gpt1",
+]
+
+[tool.uv.sources]
+gpt1 = { workspace = true }
+
+[tool.ty.environment]
+python = "../.venv"
+extra-paths = ["../gpt1"]

@@ -18,22 +18,29 @@ class TinyShakespeareDataset:
     def encode(self, content: str) -> list[int]:
         return [self.stoi[c] for c in content]
 
-    def get_batch(self, dataset: Literal['train', 'val'] = 'train', batch_size: int = 4, block_size: int = 8) -> tuple[torch.Tensor, torch.Tensor]:
-        data = self.train_data if dataset == 'train' else self.val_data
-        idx = torch.randint(len(data)-block_size, size=(batch_size,))
-        x = torch.stack([data[i:i+block_size] for i in idx]).to(self.device)
-        y = torch.stack([data[i+1:i+block_size+1] for i in idx]).to(self.device)
+    def get_batch(
+        self,
+        dataset: Literal["train", "val"] = "train",
+        batch_size: int = 4,
+        block_size: int = 8,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        data = self.train_data if dataset == "train" else self.val_data
+        idx = torch.randint(len(data) - block_size, size=(batch_size,))
+        x = torch.stack([data[i : i + block_size] for i in idx]).to(self.device)
+        y = torch.stack([data[i + 1 : i + block_size + 1] for i in idx]).to(self.device)
         return x, y
 
     def decode(self, encoded: list[int]) -> str:
         return "".join(self.itos[i] for i in encoded)
 
     @property
-    def vocab_size(self):
+    def vocab_size(self) -> int:
         return len(self.chars)
 
     @classmethod
-    def from_file(cls, path: Path | str, device: torch.Device = None) -> "TinyShakespeareDataset":
+    def from_file(
+        cls, path: Path | str, device: torch.Device = None
+    ) -> "TinyShakespeareDataset":
         return cls(Path(path).read_text(), device=device)
 
 

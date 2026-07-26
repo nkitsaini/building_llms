@@ -85,30 +85,28 @@ hidden_size = 68
 # C = torch.randn(
 #     len(CHARS), embed_size, generator=g
 # )  # ; Linear(len(CHARS), embed_size, generator=g)
-model = Sequential([
-    Embedding(vocab_size, embed_size, generator=g),
-
-    FlattenConsecutive(2),
-    Linear(2 * embed_size, hidden_size, bias=False),
-    BatchNorm(hidden_size),
-    Tanh(),
-    # batch_size, vocab_size/2 = 4, hidden_size
-    #
-    FlattenConsecutive(2),
-    Linear(2 * hidden_size, hidden_size, bias=False),
-    BatchNorm(hidden_size),
-    Tanh(),
-    # batch_size, vocab_size/2 = 2, hidden_size
-
-    FlattenConsecutive(2),
-    Linear(2 * hidden_size, hidden_size, bias=False),
-    BatchNorm(hidden_size),
-    Tanh(),
-
-    # batch_size, hidden_size
-
-    Linear(hidden_size, vocab_size, bias=False),
-])
+model = Sequential(
+    [
+        Embedding(vocab_size, embed_size, generator=g),
+        FlattenConsecutive(2),
+        Linear(2 * embed_size, hidden_size, bias=False),
+        BatchNorm(hidden_size),
+        Tanh(),
+        # batch_size, vocab_size/2 = 4, hidden_size
+        #
+        FlattenConsecutive(2),
+        Linear(2 * hidden_size, hidden_size, bias=False),
+        BatchNorm(hidden_size),
+        Tanh(),
+        # batch_size, vocab_size/2 = 2, hidden_size
+        FlattenConsecutive(2),
+        Linear(2 * hidden_size, hidden_size, bias=False),
+        BatchNorm(hidden_size),
+        Tanh(),
+        # batch_size, hidden_size
+        Linear(hidden_size, vocab_size, bias=False),
+    ]
+)
 
 with torch.no_grad():
     model.layers[-1].w *= 0.1  # ty:ignore[unresolved-attribute]
@@ -119,6 +117,7 @@ print(sum(p.nelement() for p in model.parameters()))
 # %%
 
 # compiled_model = torch.compile(model)
+
 
 def forward(x: torch.Tensor, y: torch.Tensor, training: bool = True):
     model.set_training(training)
@@ -157,6 +156,7 @@ def train(xs: torch.Tensor, ys: torch.Tensor, batch_size: int = 32, loops: int =
         losses.append(loss.item())
         lr = 1e-1 if loop_num < 150000 else 0.01
         backprop(loss, lr)
+
 
 # %%
 losses = []

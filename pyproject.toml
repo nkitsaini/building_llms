@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
 	"makemore",
-	"gpt",
+	"gpt1",
 	"matplotlib>=3.11.0",
 	"numpy>=2.4.6",
 	"tqdm>=4.68.3",
@@ -19,7 +19,7 @@ dev = [
 
 [tool.uv.sources]
 makemore = { workspace = true }
-gpt = { workspace = true }
+gpt1 = { workspace = true }
 torch = [
   { index = "pytorch-cpu", extra = "cpu" },
   { index = "pytorch-cu130", extra = "cu130" },
@@ -49,6 +49,10 @@ conflicts = [
     { extra = "cu130" },
   ],
 ]
+
+[tool.ty.environment]
+python = ".venv"
+extra-paths = ["gpt1"]
 
 
 [[tool.uv.index]]
