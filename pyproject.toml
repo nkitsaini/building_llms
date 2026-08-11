@@ -8,6 +8,7 @@ dependencies = [
 	"matplotlib>=3.11.0",
 	"numpy>=2.4.6",
 	"tqdm>=4.68.3",
+	"plotly>=6.9.0",
 ]
 
 [dependency-groups]
