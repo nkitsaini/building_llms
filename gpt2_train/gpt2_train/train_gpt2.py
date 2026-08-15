@@ -11,6 +11,7 @@ import typing as t
 import torch.nn as nn
 from torch.nn import functional as F
 import plotly.express as px
+import time
 
 @dataclass
 class GPTConfig:
@@ -28,6 +29,10 @@ class CasualSelfAttention(nn.Module):
         # key, value, query
         self.c_attn = nn.Linear(config.n_embd, 3 * config.n_embd)
         self.c_proj = nn.Linear(config.n_embd, config.n_embd)
+
+        # a lot of the times x += randn() happens inside residual stream
+        #  if we scale by 1/sqrt(times) it remains gaussian
+        self.c_proj.NANOGPT_SCALE_INIT = 1  # ty: ignore[invalid-assignment]
 
         self.n_head = config.n_head
         # not really bias, but matching gpt2 naming.
@@ -112,6 +117,8 @@ class GPT(nn.Module):
         super().__init__()
         self.config = config
 
+        ...
+
         self.transformer = nn.ModuleDict(
             {
                 "wte": nn.Embedding(config.vocab_size, config.n_embd),
@@ -121,6 +128,23 @@ class GPT(nn.Module):
             }
         )
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
+
+
+        # weight share scheme, but embedding (wte) is not matmul (lm_head)
+        # so how does sharing work?
+        self.transformer.wte.weight = self.lm_head.weight  # ty: ignore[invalid-assignment]
+        self.apply(self._init_weights)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            std = 0.02
+            if hasattr(module, "NANOGPT_SCALE_INIT"):
+                std *= (2* self.config.n_layer) ** -0.5
+            torch.nn.init.normal_(module.weight, mean=0.0, std=std)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.Embedding):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, idx: torch.Tensor, target: torch.Tensor | None = None):
         # x = (B, T)
@@ -254,26 +278,29 @@ def main():
     device = 'cpu'
     if torch.cuda.is_available():
         device = 'cuda'
+    torch.manual_seed(1337)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(1337)
     print(f"Using device: {device}")
-    data = load_dataset()
-    enc = tiktoken.get_encoding('gpt2')
-    tokens = enc.encode(data.content)
-
     B, T = 4, 32
-    buf = torch.tensor(tokens[:B*T + 1], device=device)
-
-    x = buf[:-1].view(B, T)
-    y = buf[1:].view(B, T)
+    loader = DataLoaderLite(B, T)
     model = GPT(GPTConfig())
     model.to(device)
     optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4)
     for i in range(50):
+        start = time.time()
         optimizer.zero_grad()
-        logits, loss = model(x, y)
+        x, y = loader.next_batch()
+        x = x.to(device)
+        y = y.to(device)
+        _, loss = model(x, y)
         # print(logits, loss)
         loss.backward()
         optimizer.step()
-        print(f"step {i}, loss: {loss.item()}")
+        if torch.cuda.is_available():
+            torch.cuda.synchronize() # wait for gpu operations to settle
+        duration = time.time() - start
+        print(f"step {i}, loss: {loss.item():.6f} duration: {duration:.2f}")
         ...
     # logits, loss = model(x, y)
     # print(logits, loss)

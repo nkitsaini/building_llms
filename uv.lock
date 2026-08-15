@@ -16,7 +16,7 @@ conflicts = [[
 members = [
     "building-llms",
     "gpt1",
-    "gpt2",
+    "gpt2-train",
     "makemore",
     "micrograd",
     "tokenizer",
@@ -429,9 +429,9 @@ version = "0.1.0"
 source = { editable = "gpt1" }
 
 [[package]]
-name = "gpt2"
+name = "gpt2-train"
 version = "0.1.0"
-source = { virtual = "gpt2" }
+source = { virtual = "gpt2_train" }
 dependencies = [
     { name = "tiktoken" },
     { name = "transformers", extra = ["torch"] },

@@ -11,6 +11,7 @@ if _ip:
 # %%
 #
 from transformers import GPT2LMHeadModel
+import torch
 import matplotlib.pyplot as plt
 
 
@@ -42,3 +43,12 @@ from transformers import pipeline, set_seed
 generator = pipeline("text-generation", model="gpt2")
 set_seed(42)
 generator("Hello, I'm a language model,", max_length=30, num_return_sequences=5)
+
+
+# %%
+#
+x = torch.zeros(500)
+print(x.mean(), x.std())
+for i in range(100):
+    x += torch.randn(500)
+print(x.mean(), x.std())
