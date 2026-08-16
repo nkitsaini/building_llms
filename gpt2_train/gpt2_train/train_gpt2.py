@@ -282,7 +282,7 @@ def main():
     if torch.cuda.is_available():
         torch.cuda.manual_seed(1337)
     print(f"Using device: {device}")
-    B, T = 4, 32
+    B, T = 16, 1024
     loader = DataLoaderLite(B, T)
     model = GPT(GPTConfig())
     model.to(device)
