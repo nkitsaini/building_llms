@@ -305,8 +305,11 @@ def main():
         x, y = loader.next_batch()
         x = x.to(device)
         y = y.to(device)
-        with torch.autocast(device_type='cuda', dtype=)
-        _, loss = model(x, y)
+        if torch.cuda.is_available():
+            with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+                _, loss = model(x, y)
+        else:
+            _, loss = model(x, y)
         # print(logits, loss)
         loss.backward()
         optimizer.step()
