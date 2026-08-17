@@ -304,7 +304,7 @@ def get_lr(it: int):
     if it > max_steps:
         return min_lr
 
-    decay_ratio =
+    decay_ratio = (it - warmup_steps) / (max_steps - warmup_steps)
     ...
 
 def main():
