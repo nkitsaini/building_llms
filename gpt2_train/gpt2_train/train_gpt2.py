@@ -249,7 +249,7 @@ class GPT(nn.Module):
         return optimizer
 
 class DataLoaderLite:
-    def __init__(self, B, T):
+    def __init__(self, B: int, T: int, process_rank: int, num_processes: int):
         self.B, self.T = B, T
 
         self.data = load_dataset()
