@@ -13,6 +13,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 import plotly.express as px
 import time
+import inspect
 
 @dataclass
 class GPTConfig:
@@ -239,7 +240,8 @@ class GPT(nn.Module):
         print(f"num decayed parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters")
         print(f"num non-decayed parameter tensors: {len(nondecay_params)}, with {num_nondecay_params:,} parameters")
 
-        fused_available = 'fused' in inspect.signature(torch.optim.AdamW).sign
+        fused_available = 'fused' in inspect.signature(torch.optim.AdamW).parameters
+        use_fused = fused_available
 
 class DataLoaderLite:
     def __init__(self, B, T):
