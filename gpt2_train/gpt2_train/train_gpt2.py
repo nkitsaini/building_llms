@@ -354,10 +354,12 @@ def main():
         ddp_rank = 0
         ddp_local_rank = 0
         ddp_world_size = 1
+        master_process = True
 
         device = 'cpu'
         if torch.cuda.is_available():
             device = 'cuda'
+
     torch.manual_seed(1337)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(1337)
