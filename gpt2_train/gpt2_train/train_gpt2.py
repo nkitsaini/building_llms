@@ -297,6 +297,9 @@ def get_lr(it: int):
     max_lr = 3e-4
     min_lr = max_lr * 0.1
     warm_steps = 10
+    max_steps = 50
+
+    if it < warmup_steps
     ...
 
 def main():
