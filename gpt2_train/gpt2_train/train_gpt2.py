@@ -381,6 +381,7 @@ def main():
             else:
                 _, loss = model(x, y)
             # print(logits, loss)
+            loss /= grad_accum_steps
             loss.backward()
 
         norm =torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
