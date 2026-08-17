@@ -306,6 +306,7 @@ def get_lr(it: int):
 
     decay_ratio = (it - warmup_steps) / (max_steps - warmup_steps)
     assert 0 <= decay_ratio <= 1
+    coeff = 0.5 * (1.0 + math.cos())
     ...
 
 def main():
