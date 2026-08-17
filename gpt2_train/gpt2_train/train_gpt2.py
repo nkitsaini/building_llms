@@ -347,10 +347,11 @@ def main():
 
 
     total_batch_size = 524288
+    B = 12 # micro batch size
+    T = 1024
 
 
 
-    B, T = 12, 1024
     # B, T = 13, 1024
     loader = DataLoaderLite(B, T)
     model = GPT(GPTConfig(vocab_size=50304))
