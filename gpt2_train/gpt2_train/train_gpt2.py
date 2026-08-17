@@ -227,6 +227,10 @@ class GPT(nn.Module):
 
         decay_params = [p for p in param_dict.values() if p.dim() >= 2]
         nondecay_params = [p for p in param_dict.values() if p.dim() < 2]
+
+        optim_groups = {
+            {'params': decay_params, }
+        }
 class DataLoaderLite:
     def __init__(self, B, T):
         self.B, self.T = B, T
