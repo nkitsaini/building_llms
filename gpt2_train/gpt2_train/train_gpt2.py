@@ -278,9 +278,10 @@ def predict():
 
 Baseline: f32
     step 45, loss: 6.238739 duration: 0.32
-Baseline:
+Baseline: tf32
 
 """
+torch.
 def main():
     device = 'cpu'
     if torch.cuda.is_available():
