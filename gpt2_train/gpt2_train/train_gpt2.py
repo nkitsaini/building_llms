@@ -302,7 +302,7 @@ def main():
         torch.cuda.manual_seed(1337)
     print(f"Using device: {device}")
     B, T = 12, 1024
-    B, T = 13, 1024
+    # B, T = 13, 1024
     loader = DataLoaderLite(B, T)
     model = GPT(GPTConfig())
     model.to(device)
