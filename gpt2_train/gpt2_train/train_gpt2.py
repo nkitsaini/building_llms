@@ -348,7 +348,9 @@ def main():
 
     total_batch_size = 524288
     B = 12 # micro batch size
-    T = 1024
+    T = 1024 # sequence length
+
+    assert total_batch_size % (B * T) == 0, ""
 
 
 
