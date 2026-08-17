@@ -417,7 +417,7 @@ def main():
     model.to(device)
     model = torch.compile(model)
     if ddp:
-
+        model = DDP(model, device_ids=[ddp_local_rank])
     optimizer = model.configure_optimizers(  # ty: ignore[unresolved-attribute]
         weight_decay=0.1, learning_rate=6e-4, device=device
     )
