@@ -14,6 +14,7 @@ from torch.nn import functional as F
 import plotly.express as px
 import time
 import inspect
+from torch.distributed import init_process_group,
 
 @dataclass
 class GPTConfig:
@@ -336,6 +337,8 @@ def get_lr(it: int):
     ...
 
 def main():
+
+
 
     device = 'cpu'
     if torch.cuda.is_available():
