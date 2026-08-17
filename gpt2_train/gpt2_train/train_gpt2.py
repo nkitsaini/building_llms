@@ -422,7 +422,7 @@ def main():
     if ddp:
         model = DDP(model, device_ids=[ddp_local_rank])
         raw_model = model.module
-    optimizer = raw_model.configure_optimizers(  # ty: ignore[unresolved-reference]
+    optimizer = raw_model.configure_optimizers(  # ty: ignore[unresolved-attribute]
         weight_decay=0.1, learning_rate=6e-4, device=device
     )
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
