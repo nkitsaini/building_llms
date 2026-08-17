@@ -223,7 +223,7 @@ class GPT(nn.Module):
         return model
 
     def configure_optimizers(self, weight_decay:float, learning_rate:float, device: str|None = None):
-        param_dict = {pn: p for pn, n}
+        param_dict = {pn: p for pn, p in self.named_parameters() if p.requires_grad}
         ...
 class DataLoaderLite:
     def __init__(self, B, T):
