@@ -281,7 +281,11 @@ Baseline: f32
 Baseline: tf32
 
 """
-# torch.
+
+# enable tf32
+torch.set_float32_matmul_precision('high')
+
+
 def main():
     device = 'cpu'
     if torch.cuda.is_available():
