@@ -415,12 +415,12 @@ def main():
     print("I am gpu", ddp_rank)
 
     loader = DataLoaderLite(B, T, process_rank=ddp_rank, num_processes=ddp_world_size)
-    model = GPT(GPTConfig(vocab_size=50304))
-    model.to(device)
-    model = torch.compile(model)
+    raw_model = GPT(GPTConfig(vocab_size=50304))
+    raw_model.to(device)
+    raw_model = torch.compile(raw_model)
     if ddp:
-        model = DDP(model, device_ids=[ddp_local_rank])
-    optimizer = model.configure_optimizers(  # ty: ignore[unresolved-attribute]
+        model = DDP(raw_model, device_ids=[ddp_local_rank])
+    optimizer = raw_model.configure_optimizers(  # ty: ignore[unresolved-attribute]
         weight_decay=0.1, learning_rate=6e-4, device=device
     )
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
