@@ -305,7 +305,7 @@ def main():
         x, y = loader.next_batch()
         x = x.to(device)
         y = y.to(device)
-        with torch.autocast()
+        with torch.autocast(device_type='cuda', dtype=)
         _, loss = model(x, y)
         # print(logits, loss)
         loss.backward()
