@@ -371,7 +371,7 @@ def main():
 
         # if reset_grad:
         optimizer.zero_grad()
-        for _ in range(grad_accum_steps):
+        for micro_step in range(grad_accum_steps):
             x, y = loader.next_batch()
             x = x.to(device)
             y = y.to(device)
@@ -382,11 +382,11 @@ def main():
                 _, loss = model(x, y)
             # print(logits, loss)
             loss.backward()
-            norm =torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
 
-            lr = get_lr(step)
-            for param_group in optimizer.param_groups:
-                param_group['lr'] = lr
+        norm =torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
+        lr = get_lr(step)
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = lr
 
         # if optimize_grad:
         optimizer.step()
