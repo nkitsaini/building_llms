@@ -293,6 +293,10 @@ tf32
 torch.set_float32_matmul_precision('high')
 
 
+def get_lr(it: int):
+    max_lr =
+    ...
+
 def main():
     device = 'cpu'
     if torch.cuda.is_available():
