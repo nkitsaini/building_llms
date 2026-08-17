@@ -336,6 +336,7 @@ def get_lr(it: int):
     ...
 
 def main():
+
     device = 'cpu'
     if torch.cuda.is_available():
         device = 'cuda'
@@ -349,7 +350,7 @@ def main():
     model = GPT(GPTConfig(vocab_size=50304))
     model.to(device)
     model = torch.compile(model)
-    optimizer = model.configure_optimizers(weight_decay=0.1, learning_rate=6e-4, device=device)
+    optimizer = model.configure_optimizers(weight_decay=0.1, learning_rate=6e-4, device=device)  # ty: ignore[unresolved-attribute]
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
     for step in range(max_steps):
         start = time.time()
