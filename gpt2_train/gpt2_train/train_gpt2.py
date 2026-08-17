@@ -444,7 +444,7 @@ def main():
             loss /= grad_accum_steps
             loss_accum += loss.detach()
             if ddp:
-                model.require_backward_grad_sync
+                model.require_backward_grad_sync = (micro_step == grad_accum_steps -1)  # ty: ignore[unresolved-attribute]
             loss.backward()
 
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
