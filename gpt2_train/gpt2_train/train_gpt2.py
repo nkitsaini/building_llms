@@ -321,6 +321,7 @@ def main():
             _, loss = model(x, y)
         # print(logits, loss)
         loss.backward()
+        norm =torch.nn.utils.
         optimizer.step()
         if torch.cuda.is_available():
             torch.cuda.synchronize() # wait for gpu operations to settle
