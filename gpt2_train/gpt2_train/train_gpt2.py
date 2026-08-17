@@ -239,7 +239,7 @@ class GPT(nn.Module):
         print(f"num decayed parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters")
         print(f"num non-decayed parameter tensors: {len(nondecay_params)}, with {num_nondecay_params:,} parameters")
 
-        fused_available =
+        fused_available = 'fused' in inspect.signature(torch.optim.AdamW).sign
 
 class DataLoaderLite:
     def __init__(self, B, T):
