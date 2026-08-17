@@ -305,6 +305,7 @@ def main():
         x, y = loader.next_batch()
         x = x.to(device)
         y = y.to(device)
+        with torch.autocast()
         _, loss = model(x, y)
         # print(logits, loss)
         loss.backward()
