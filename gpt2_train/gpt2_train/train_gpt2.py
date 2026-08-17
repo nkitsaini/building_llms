@@ -369,7 +369,8 @@ def main():
         reset_grad = step % grad_accum_steps == 0
         optimize_grad = (step+1) % grad_accum_steps == 0
 
-        optimizer.zero_grad()
+        if reset_grad:
+            optimizer.zero_grad()
         x, y = loader.next_batch()
         x = x.to(device)
         y = y.to(device)
@@ -386,7 +387,8 @@ def main():
         for param_group in optimizer.param_groups:
             param_group['lr'] = lr
 
-        optimizer.step()
+        if optimize_grad:
+            optimizer.step()
         if torch.cuda.is_available():
             torch.cuda.synchronize() # wait for gpu operations to settle
         duration = time.time() - start
