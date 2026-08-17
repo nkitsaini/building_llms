@@ -352,6 +352,7 @@ def main():
 
     assert total_batch_size % (B * T) == 0, f"make sure {total_batch_size=} is divisble by {B*T=}"
     grad_accum_steps = total_batch_size // (B*T)
+    print(f"total desired batch_size: ")
 
 
 
