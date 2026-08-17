@@ -308,6 +308,7 @@ def main():
         if torch.cuda.is_available():
             torch.cuda.synchronize() # wait for gpu operations to settle
         duration = time.time() - start
+        tokens_per_second =
         print(f"step {i}, loss: {loss.item():.6f} duration: {duration:.2f}")
         ...
     # logits, loss = model(x, y)
