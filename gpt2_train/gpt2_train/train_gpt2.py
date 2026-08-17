@@ -339,7 +339,10 @@ def get_lr(it: int):
 
 def main():
 
-    ddp = int(os.environ.get())
+    ddp = int(os.environ.get('RANK', -1)) != -1
+
+    if ddp:
+    else:
 
 
     device = 'cpu'
