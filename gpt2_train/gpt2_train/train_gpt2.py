@@ -232,6 +232,8 @@ class GPT(nn.Module):
             {'params': decay_params, 'weight_decay': weight_decay },
             {'params': nondecay_params, 'weight_decay': 0.0 },
         }
+
+        num_decay_params = sum(p.numel())
 class DataLoaderLite:
     def __init__(self, B, T):
         self.B, self.T = B, T
