@@ -236,7 +236,8 @@ class GPT(nn.Module):
         num_decay_params = sum(p.numel() for p in decay_params)
         num_nondecay_params = sum(p.numel() for p in nondecay_params)
 
-        print(f"num decay parameter tensors: {}")
+        print(f"num decay parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters")
+        print(f"num non-decay parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters")
 class DataLoaderLite:
     def __init__(self, B, T):
         self.B, self.T = B, T
