@@ -346,8 +346,8 @@ def main():
     print(f"Using device: {device}")
 
 
-    total_batch_size = 524288
-    total_batch_size = 524288
+    total_batch_size = 524288 # (2^19)
+    # total_batch_size = 589824 # 12 * 1024 * (2^4 * 3)
     B = 8 # micro batch size
     T = 1024 # sequence length
 
