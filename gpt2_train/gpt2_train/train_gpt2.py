@@ -327,7 +327,7 @@ def main():
             torch.cuda.synchronize() # wait for gpu operations to settle
         duration = time.time() - start
         tps = (loader.T * loader.B)/duration
-        print(f"step {i} | loss: {loss.item():.6f} | norm: {norm:3f} | duration: {duration:.3f}s | tps: {tps:.2f}")
+        print(f"step {i} | loss: {loss.item():.6f} | norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}")
         ...
     # logits, loss = model(x, y)
     # print(logits, loss)
