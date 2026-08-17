@@ -277,7 +277,7 @@ def predict():
 """
 
 Baseline: f32
-    step 45, loss: 6.238739 duration: 0.32
+    step 21, loss: 6.412067 duration: 0.32 tps: 38352.09
 Baseline: tf32
 
 """
