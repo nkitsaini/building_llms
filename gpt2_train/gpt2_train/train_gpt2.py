@@ -413,7 +413,7 @@ def main():
     print("I am gpu", ddp_rank)
     return
 
-    loader = DataLoaderLite(B, T)
+    loader = DataLoaderLite(B, T, process_rank=ddp_rank, num_processes=ddp_world_size)
     model = GPT(GPTConfig(vocab_size=50304))
     model.to(device)
     model = torch.compile(model)
