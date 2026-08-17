@@ -340,6 +340,10 @@ def main():
         # print(logits, loss)
         loss.backward()
         norm =torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
+
+        lr =
+
+
         optimizer.step()
         if torch.cuda.is_available():
             torch.cuda.synchronize() # wait for gpu operations to settle
