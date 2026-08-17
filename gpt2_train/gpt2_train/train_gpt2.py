@@ -260,7 +260,7 @@ class DataLoaderLite:
         print(f'loaded {len(self.tokens)} tokens')
         print(f'1 epoch = {len(self.tokens) // (B*T)} batches')
 
-        self.pos =0
+        self.pos = self.B * self.T * self.process_rank
 
     def next_batch(self) -> t.Tuple[torch.Tensor, torch.Tensor]:
         B, T = self.B, self.T
