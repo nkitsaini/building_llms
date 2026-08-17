@@ -443,6 +443,8 @@ def main():
             # print(logits, loss)
             loss /= grad_accum_steps
             loss_accum += loss.detach()
+            if ddp:
+                model.require_backward_grad_sync
             loss.backward()
 
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
