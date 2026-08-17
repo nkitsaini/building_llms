@@ -344,6 +344,12 @@ def main():
     if torch.cuda.is_available():
         torch.cuda.manual_seed(1337)
     print(f"Using device: {device}")
+
+
+    total_batch_size = 524288
+
+
+
     B, T = 12, 1024
     # B, T = 13, 1024
     loader = DataLoaderLite(B, T)
