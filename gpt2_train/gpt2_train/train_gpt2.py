@@ -300,7 +300,7 @@ def get_lr(it: int):
     max_steps = 50
 
     if it < warmup_steps:
-        return max_lr * (it+1) *
+        return max_lr * (it+1) / warmup_steps
     ...
 
 def main():
