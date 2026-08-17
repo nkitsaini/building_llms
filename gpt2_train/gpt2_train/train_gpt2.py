@@ -379,7 +379,7 @@ def main():
         print(f"total desired batch_size: {total_batch_size:,}")
         print(f"=> calculated gradient accumulation steps: {grad_accum_steps}")
 
-    p
+    print("I am gpu", ddp_rank)
     return
 
     loader = DataLoaderLite(B, T)
