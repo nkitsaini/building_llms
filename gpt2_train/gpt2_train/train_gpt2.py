@@ -448,7 +448,7 @@ def main():
                 model.require_backward_grad_sync = (micro_step == grad_accum_steps -1)  # ty: ignore[unresolved-attribute]
             loss.backward()
         if ddp:
-            dist.all_reduce(loss_accum, op=dist.)
+            dist.all_reduce(loss_accum, op=dist.ReduceOp.AVG)
 
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
         lr = get_lr(step)
