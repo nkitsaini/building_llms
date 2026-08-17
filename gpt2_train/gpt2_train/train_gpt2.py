@@ -269,7 +269,7 @@ class DataLoaderLite:
         y = buf[1:].view(B, T)
 
         self.pos += B*T * self.num_processes
-        if self.pos + B*T +1 > len(self.tokens): # ???
+        if self.pos + (B*T *self.num_processes +1) > len(self.tokens): # ???
             self.pos = 0
 
         return x, y
