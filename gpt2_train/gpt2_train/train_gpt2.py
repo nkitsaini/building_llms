@@ -372,12 +372,12 @@ def main():
     B = 8 # micro batch size
     T = 1024 # sequence length
 
-    assert total_batch_size % (B * T * ddp_world_size) == 0, f"make sure {total_batch_size=} is divisble by {B*T=}"
+    assert total_batch_size % (B * T * ddp_world_size) == 0, f"make sure {total_batch_size=} is divisble by {B*T*ddp_world_size=}"
     grad_accum_steps = total_batch_size // (B*T * ddp_world_size)
-    print(f"total desired batch_size: {total_batch_size:,}")
-    print(f"=> calculated gradient accumulation steps: {grad_accum_steps}")
 
-
+    if master_process:
+        print(f"total desired batch_size: {total_batch_size:,}")
+        print(f"=> calculated gradient accumulation steps: {grad_accum_steps}")
 
     loader = DataLoaderLite(B, T)
     model = GPT(GPTConfig(vocab_size=50304))
