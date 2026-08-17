@@ -379,6 +379,9 @@ def main():
         print(f"total desired batch_size: {total_batch_size:,}")
         print(f"=> calculated gradient accumulation steps: {grad_accum_steps}")
 
+    p
+    return
+
     loader = DataLoaderLite(B, T)
     model = GPT(GPTConfig(vocab_size=50304))
     model.to(device)
