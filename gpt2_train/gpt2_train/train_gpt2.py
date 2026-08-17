@@ -294,11 +294,11 @@ tf32
 torch.set_float32_matmul_precision('high')
 
 
+max_steps = 50
 def get_lr(it: int):
     max_lr = 3e-4
     min_lr = max_lr * 0.1
     warmup_steps = 10
-    max_steps = 50
 
     if it < warmup_steps:
         return max_lr * (it+1) / warmup_steps
@@ -326,7 +326,7 @@ def main():
     model.to(device)
     model = torch.compile(model)
     optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
-    for i in range(50):
+    for step in range(max_steps):
         start = time.time()
         optimizer.zero_grad()
         x, y = loader.next_batch()
@@ -345,7 +345,7 @@ def main():
             torch.cuda.synchronize() # wait for gpu operations to settle
         duration = time.time() - start
         tps = (loader.T * loader.B)/duration
-        print(f"step {i} | loss: {loss.item():.6f} | norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}")
+        print(f"step {step} | loss: {loss.item():.6f} | norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}")
         ...
     # logits, loss = model(x, y)
     # print(logits, loss)
