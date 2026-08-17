@@ -276,10 +276,10 @@ def predict():
 
 """
 
-Baseline: f32
+f32 - baseline
     step 21, loss: 6.412067 duration: 0.32 tps: 38352.09
-Baseline: tf32
-
+tf32
+    step 11, loss: 7.365175 duration: 0.26 tps: 47055.24
 """
 
 # enable tf32
