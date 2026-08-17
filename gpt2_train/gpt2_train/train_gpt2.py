@@ -347,7 +347,8 @@ def main():
 
 
     total_batch_size = 524288
-    B = 12 # micro batch size
+    total_batch_size = 524288
+    B = 8 # micro batch size
     T = 1024 # sequence length
 
     assert total_batch_size % (B * T) == 0, f"make sure {total_batch_size=} is divisble by {B*T=}"
@@ -357,7 +358,6 @@ def main():
 
 
 
-    # B, T = 13, 1024
     loader = DataLoaderLite(B, T)
     model = GPT(GPTConfig(vocab_size=50304))
     model.to(device)
