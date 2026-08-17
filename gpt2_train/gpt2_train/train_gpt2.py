@@ -366,7 +366,9 @@ def main():
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
     for step in range(max_steps):
         start = time.time()
-        reset = step % grad_accum_steps == 0
+        reset_grad = step % grad_accum_steps == 0
+        optimize_grad = (step+1) % grad_accum_steps == 0
+
         optimizer.zero_grad()
         x, y = loader.next_batch()
         x = x.to(device)
