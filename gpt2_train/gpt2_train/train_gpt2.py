@@ -59,14 +59,14 @@ class CasualSelfAttention(nn.Module):
         q = q.view(B, T, self.n_head, C//self.n_head).transpose(1, 2)
         v = v.view(B, T, self.n_head, C//self.n_head).transpose(1, 2)
 
-        att = q @ k.transpose(-1, -2) * (k.size(-1)**-0.5) # [B, n_head, T, T]
-        att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float('-inf'))  # ty: ignore[not-subscriptable]
-        att = F.softmax(att, dim=-1) # [B, n_head, T, T]
+        # att = q @ k.transpose(-1, -2) * (k.size(-1)**-0.5) # [B, n_head, T, T]
+        # att = att.masked_fill(self.bias[:, :, :T, :T] == 0, float('-inf'))  # ty: ignore[not-subscriptable]
+        # att = F.softmax(att, dim=-1) # [B, n_head, T, T]
 
-        all_close = torch.allclose(att.sum(-1), torch.ones_like(att.sum(-1)))
-        assert all_close
+        # # all_close = torch.allclose(att.sum(-1), torch.ones_like(att.sum(-1)))
+        # # assert all_close
 
-        y = att @ v # (B, nH, T, T) @ (B, nH, T, C/nH) = (B, nH, T, C/nH)
+        # y = att @ v # (B, nH, T, T) @ (B, nH, T, C/nH) = (B, nH, T, C/nH)
 
         # without contiguous pytorch will throw error as `transpose` makes the tensor non-contiguous
         # because transpose does not reorder memory
