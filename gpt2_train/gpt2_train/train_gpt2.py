@@ -342,6 +342,8 @@ def main():
     ddp = int(os.environ.get('RANK', -1)) != -1
 
     if ddp:
+        assert torch.cuda.is_available(), "ddp without cuda?"
+        init_process_
     else:
 
 
