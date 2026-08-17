@@ -465,7 +465,8 @@ def main():
         print(
             f"step {step} | loss: {loss_accum.item():.6f} | lr: {lr:.4e} norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}"
         )
-        ...
+    if ddp:
+        destroy_process_group()
     # logits, loss = model(x, y)
     # print(logits, loss)
     # print(x)
