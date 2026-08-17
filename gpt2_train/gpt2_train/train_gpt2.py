@@ -411,15 +411,16 @@ def main():
         print(f"=> calculated gradient accumulation steps: {grad_accum_steps}")
 
     print("I am gpu", ddp_rank)
-    return
 
     loader = DataLoaderLite(B, T, process_rank=ddp_rank, num_processes=ddp_world_size)
     model = GPT(GPTConfig(vocab_size=50304))
     model.to(device)
     model = torch.compile(model)
-    optimizer = model.configure_optimizers(
+    if ddp:
+
+    optimizer = model.configure_optimizers(  # ty: ignore[unresolved-attribute]
         weight_decay=0.1, learning_rate=6e-4, device=device
-    )  # ty: ignore[unresolved-attribute]
+    )
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
     for step in range(max_steps):
         start = time.time()
