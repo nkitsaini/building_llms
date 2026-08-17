@@ -274,6 +274,13 @@ def predict():
         decoded = enc.decode(tokens)
         print(">", decoded)
 
+"""
+
+Baseline: f32
+    step 45, loss: 6.238739 duration: 0.32
+Baseline:
+
+"""
 def main():
     device = 'cpu'
     if torch.cuda.is_available():
