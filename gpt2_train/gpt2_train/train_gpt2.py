@@ -298,6 +298,7 @@ def main():
     loader = DataLoaderLite(B, T)
     model = GPT(GPTConfig())
     model.to(device)
+    model = torch.compile(model)
     optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4)
     for i in range(50):
         start = time.time()
