@@ -299,7 +299,7 @@ def main():
     model = GPT(GPTConfig())
     model.to(device)
     model = torch.compile(model)
-    optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4)
+    optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4)  # ty: ignore[unresolved-attribute]
     for i in range(50):
         start = time.time()
         optimizer.zero_grad()
