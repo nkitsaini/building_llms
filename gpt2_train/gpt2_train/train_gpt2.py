@@ -345,6 +345,8 @@ def main():
         assert torch.cuda.is_available(), "ddp without cuda?"
         init_process_group(backend='nccl') # What is nccl?
         ddp_rank = int(os.environ['RANK'])
+        ddp_local_rank = int(os.environ['LOCAL_RANK'])
+        ddp_world_size = int(os.environ['LOCAL_RANK'])
     else:
 
 
