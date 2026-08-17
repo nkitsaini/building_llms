@@ -73,7 +73,7 @@ class CasualSelfAttention(nn.Module):
         #
         #
         ### Flas attentino
-        y = F.scaled_dot_product_attention()
+        y = F.scaled_dot_product_attention(q, k, v, is_causal=True)
 
         # without contiguous pytorch will throw error as `transpose` makes the tensor non-contiguous
         # because transpose does not reorder memory
