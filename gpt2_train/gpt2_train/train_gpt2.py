@@ -359,7 +359,6 @@ def main():
         device = 'cpu'
         if torch.cuda.is_available():
             device = 'cuda'
-    print(f"using device: {device}")
 
     torch.manual_seed(1337)
     if torch.cuda.is_available():
