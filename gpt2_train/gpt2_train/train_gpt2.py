@@ -281,7 +281,7 @@ Baseline: f32
 Baseline: tf32
 
 """
-torch.
+# torch.
 def main():
     device = 'cpu'
     if torch.cuda.is_available():
@@ -308,8 +308,8 @@ def main():
         if torch.cuda.is_available():
             torch.cuda.synchronize() # wait for gpu operations to settle
         duration = time.time() - start
-        tokens_per_second =
-        print(f"step {i}, loss: {loss.item():.6f} duration: {duration:.2f}")
+        tps = (loader.T * loader.B)/duration
+        print(f"step {i}, loss: {loss.item():.6f} duration: {duration:.2f} tps: {tps:.2f}")
         ...
     # logits, loss = model(x, y)
     # print(logits, loss)
