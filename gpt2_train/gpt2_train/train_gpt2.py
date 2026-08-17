@@ -6,6 +6,7 @@ from .plot_helpers import AutoFig
 import plotly.graph_objects as go
 import torch
 
+import os
 import matplotlib.pyplot as plt
 import math
 import typing as t
@@ -14,7 +15,7 @@ from torch.nn import functional as F
 import plotly.express as px
 import time
 import inspect
-from torch.distributed import init_process_group,
+from torch.distributed import init_process_group, destroy_process_group
 
 @dataclass
 class GPTConfig:
@@ -338,6 +339,7 @@ def get_lr(it: int):
 
 def main():
 
+    ddp = int(os.environ.get())
 
 
     device = 'cpu'
