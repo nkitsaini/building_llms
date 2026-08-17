@@ -242,7 +242,9 @@ class GPT(nn.Module):
 
         fused_available = 'fused' in inspect.signature(torch.optim.AdamW).parameters
         use_fused = fused_available and (device is not None and 'cuda' in device)
-        use_fused = fused_available and (device is not None and 'cuda' in device)
+        print(f"using fused AdamW: {use_fused}")
+        optimizer =
+        return optimizer
 
 class DataLoaderLite:
     def __init__(self, B, T):
