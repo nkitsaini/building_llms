@@ -433,7 +433,7 @@ def main():
 
         # if reset_grad:
         optimizer.zero_grad()
-        loss_accum = torch.zeros(1)
+        loss_accum = torch.zeros(1, device=device)
         for micro_step in range(grad_accum_steps):
             x, y = loader.next_batch()
             x = x.to(device)
@@ -464,9 +464,10 @@ def main():
         duration = time.time() - start
         tokens_processed = (loader.T * loader.B) * grad_accum_steps * ddp_world_size
         tps = (tokens_processed) / duration
-        print(
-            f"step {step} | loss: {loss_accum.item():.6f} | lr: {lr:.4e} norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}"
-        )
+        if master_process:
+            print(
+                f"step {step} | loss: {loss_accum.item():.6f} | lr: {lr:.4e} norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}"
+            )
     if ddp:
         destroy_process_group()
     # logits, loss = model(x, y)
