@@ -304,7 +304,7 @@ def main():
     B, T = 12, 1024
     # B, T = 13, 1024
     loader = DataLoaderLite(B, T)
-    model = GPT(GPTConfig())
+    model = GPT(GPTConfig(vocab_size=))
     model.to(device)
     model = torch.compile(model)
     optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4)  # ty: ignore[unresolved-attribute]
