@@ -251,6 +251,8 @@ class GPT(nn.Module):
 class DataLoaderLite:
     def __init__(self, B: int, T: int, process_rank: int, num_processes: int):
         self.B, self.T = B, T
+        self.process_rank = process_rank
+        self.num_processes = num_processes
 
         self.data = load_dataset()
         enc = tiktoken.get_encoding('gpt2')
