@@ -16,6 +16,7 @@ import plotly.express as px
 import time
 import inspect
 from torch.distributed import init_process_group, destroy_process_group
+import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 
@@ -447,6 +448,7 @@ def main():
                 model.require_backward_grad_sync = (micro_step == grad_accum_steps -1)  # ty: ignore[unresolved-attribute]
             loss.backward()
         if ddp:
+            dist.all_reduce(loss_accum, op=dist.)
 
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
         lr = get_lr(step)
