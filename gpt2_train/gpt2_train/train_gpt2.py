@@ -351,7 +351,7 @@ def main():
     T = 1024 # sequence length
 
     assert total_batch_size % (B * T) == 0, f"make sure {total_batch_size=} is divisble by {B*T=}"
-    grad_accum_steps =
+    grad_accum_steps = total_batch_size // (B*T)
 
 
 
