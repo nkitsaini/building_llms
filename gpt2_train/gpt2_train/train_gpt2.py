@@ -366,29 +366,30 @@ def main():
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
     for step in range(max_steps):
         start = time.time()
-        reset_grad = step % grad_accum_steps == 0
-        optimize_grad = (step+1) % grad_accum_steps == 0
+        # reset_grad = step % grad_accum_steps == 0
+        # optimize_grad = (step+1) % grad_accum_steps == 0
 
-        if reset_grad:
-            optimizer.zero_grad()
-        x, y = loader.next_batch()
-        x = x.to(device)
-        y = y.to(device)
-        if torch.cuda.is_available():
-            with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+        # if reset_grad:
+        optimizer.zero_grad()
+        for _ in range(grad_accum_steps):
+            x, y = loader.next_batch()
+            x = x.to(device)
+            y = y.to(device)
+            if torch.cuda.is_available():
+                with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+                    _, loss = model(x, y)
+            else:
                 _, loss = model(x, y)
-        else:
-            _, loss = model(x, y)
-        # print(logits, loss)
-        loss.backward()
-        norm =torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
+            # print(logits, loss)
+            loss.backward()
+            norm =torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
 
-        lr = get_lr(step)
-        for param_group in optimizer.param_groups:
-            param_group['lr'] = lr
+            lr = get_lr(step)
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = lr
 
-        if optimize_grad:
-            optimizer.step()
+        # if optimize_grad:
+        optimizer.step()
         if torch.cuda.is_available():
             torch.cuda.synchronize() # wait for gpu operations to settle
         duration = time.time() - start
