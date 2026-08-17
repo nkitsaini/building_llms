@@ -341,7 +341,9 @@ def main():
         loss.backward()
         norm =torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
 
-        lr =
+        lr = get_lr(step)
+        for param_group in optimizer.param_groups:
+            param_group['lr'] =
 
 
         optimizer.step()
