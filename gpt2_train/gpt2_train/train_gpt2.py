@@ -353,12 +353,11 @@ def main():
     else:
         ddp_rank = 0
         ddp_local_rank = 0
-        ddp_local_rank = 0
+        ddp_world_size = 1
 
-
-    device = 'cpu'
-    if torch.cuda.is_available():
-        device = 'cuda'
+        device = 'cpu'
+        if torch.cuda.is_available():
+            device = 'cuda'
     torch.manual_seed(1337)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(1337)
