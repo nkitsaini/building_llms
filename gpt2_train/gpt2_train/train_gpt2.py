@@ -371,6 +371,7 @@ def main():
 
         # if reset_grad:
         optimizer.zero_grad()
+        loss_accum = 0.0
         for micro_step in range(grad_accum_steps):
             x, y = loader.next_batch()
             x = x.to(device)
@@ -382,6 +383,7 @@ def main():
                 _, loss = model(x, y)
             # print(logits, loss)
             loss /= grad_accum_steps
+            loss_accum += loss.detach()
             loss.backward()
 
         norm =torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # ty: ignore[unresolved-attribute]
@@ -395,7 +397,7 @@ def main():
             torch.cuda.synchronize() # wait for gpu operations to settle
         duration = time.time() - start
         tps = (loader.T * loader.B)/duration
-        print(f"step {step} | loss: {loss.item():.6f} | lr: {lr:.4e} norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}")
+        print(f"step {step} | loss: {loss_accum.item():.6f} | lr: {lr:.4e} norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}")
         ...
     # logits, loss = model(x, y)
     # print(logits, loss)
