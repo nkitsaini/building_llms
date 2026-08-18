@@ -42,6 +42,9 @@ def tokenize(doc: dict):
     tokens_np_uint16 = tokens_np.astype(np.uint16)
     return tokens_np_uint16
 
+with mp.Pool() as pool:
+    shard_index = 0
+    all_tokens_np =
 # print (len(fw))
 # print(fw[1])
 # for i in fw:
