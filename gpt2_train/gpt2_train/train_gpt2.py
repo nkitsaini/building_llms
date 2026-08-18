@@ -472,38 +472,36 @@ def get_lr(it: int):
 
 
 def hella_swag_validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, step: int):
-    ## ========= Validation loss
-    model.eval()
-    val_loader.reset()
-    with torch.no_grad():
-        val_loss_accum = 0.0
-        val_loss_steps = 20
-        for _ in range(val_loss_steps):
-            x, y = val_loader.next_batch()
-            x = x.to(device)
-            y = y.to(device)
+    num_correct_norm = 0
+    num_total = 0
+    for i, example in enumerate(iterate_examples("val")):
+        # only process examples where i % ddp_world_size == ddp_rank
+        if i % ddp_world_size != ddp_rank:
+            continue
+        # render the example into tokens and labels
+        _, tokens, mask, label = render_example(example)
+        tokens = tokens.to(device)
+        mask = mask.to(device)
+        # get the logits
+        with torch.no_grad():
             with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
-                logits, loss = model(x, y)
-            val_loss_accum += (loss/val_loss_steps).detach()
+                logits, loss = model(tokens)
+            pred_norm = get_most_likely_row(tokens, mask, logits)
+        num_total += 1
+        num_correct_norm += int(pred_norm == label)
+    # reduce the stats across all processes
     if ddp:
-        dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
+        num_total = torch.tensor(num_total, dtype=torch.long, device=device)
+        num_correct_norm = torch.tensor(num_correct_norm, dtype=torch.long, device=device)
+        dist.all_reduce(num_total, op=dist.ReduceOp.SUM)
+        dist.all_reduce(num_correct_norm, op=dist.ReduceOp.SUM)
+        num_total = num_total.item()
+        num_correct_norm = num_correct_norm.item()
+    acc_norm = num_correct_norm / num_total
     if master_process:
-        log(f"validation loss: {val_loss_accum.item():.4f}")
-        log_file = get_log_filepath()
+        print(f"HellaSwag accuracy: {num_correct_norm}/{num_total}={acc_norm:.4f}")
         with open(log_file, "a") as f:
-            f.write(json.dumps({
-                "val_loss": val_loss_accum.item(),
-                "step": step,
-            }) + "\n")
-        ## ========= Checkpointing
-        if step != 0 and step % 5000 == 0:
-            ck_path = get_checkpoint_dir()/f'model_{step:05d}.pt'
-            torch.save( {
-                "model": raw_model.state_dict(),
-                'config': raw_model.config,
-                'step': step,
-                'val_loss': val_loss_accum.item()
-            }, ck_path)
+            f.write(f"{step} hella {acc_norm:.4f}\n")
 
 def validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, step: int):
     ## ========= Validation loss
