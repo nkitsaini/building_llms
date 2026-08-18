@@ -36,7 +36,8 @@ eot = enc._special_tokens["<|endoftext|>"]
 def tokenize(doc: dict):
     text = doc['text']
     tokens = [eot]
-    tokens += enc.encode(text)
+    tokens.extend(enc.encode_ordinary(text))
+        assert (0 <= tokens_np).all() and (tokens_np < 2**16).all(), "token dictionary too large for uint16"
 
 # print (len(fw))
 # print(fw[1])
