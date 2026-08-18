@@ -540,13 +540,13 @@ def main():
                         "step": step,
                     }) + "\n")
 
-            model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
         # reset_grad = step % grad_accum_steps == 0
         # optimize_grad = (step+1) % grad_accum_steps == 0
 
         # if reset_grad:
+        model.train()
         optimizer.zero_grad()
         loss_accum = torch.zeros(1, device=device)
         for micro_step in range(grad_accum_steps):
