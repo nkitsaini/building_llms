@@ -13,6 +13,7 @@ from gpt.dataset import load_dataset
 from .plot_helpers import AutoFig
 import plotly.graph_objects as go
 import torch
+import json
 
 import os
 import matplotlib.pyplot as plt
@@ -27,7 +28,7 @@ import inspect
 from torch.distributed import init_process_group, destroy_process_group
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
-from .dataset_helpers import get_fineweb_dir, get_hellaswag_dir
+from .dataset_helpers import get_fineweb_dir, get_hellaswag_dir, get_log_filepath, get_checkpoint_dir
 
 
 @dataclass
@@ -532,8 +533,12 @@ def main():
                 dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
             if master_process:
                 log(f"validation loss: {val_loss_accum.item():.4f}")
+                log_file = get_log_filepath()
                 with open(log_file, "a") as f:
-                    f.write()
+                    f.write(json.dumps({
+                        "val_loss": val_loss_accum
+                        "step": val_loss_accum
+                    }) + "\n")
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
