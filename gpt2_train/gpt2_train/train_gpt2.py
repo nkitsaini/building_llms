@@ -530,6 +530,8 @@ def main():
                     val_loss_accum += (loss/val_loss_steps).detach()
             if ddp:
                 dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
+            if master_process:
+                log(f"validation loss: {val_loss_accum")
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
