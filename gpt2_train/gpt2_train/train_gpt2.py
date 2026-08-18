@@ -531,7 +531,8 @@ def main():
             if ddp:
                 dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
             if master_process:
-                log(f"validation loss: {val_loss_accum")
+                log(f"validation loss: {val_loss_accum.item():.4f}")
+                with open(log_file, "a"):
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
