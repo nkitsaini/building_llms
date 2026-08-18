@@ -516,7 +516,15 @@ def main():
 
         last_step = step == max_steps -1
 
+        ## ========= Checkpointing
+        if step != 0 and step % 5000 == 0:
+            dir = get_checkpoint_dir()
+            dir.sav
+
         if step % 250 == 0 or last_step:
+
+
+            ## ========= Validation loss
             model.eval()  # ty: ignore[unresolved-attribute]
             val_loader.reset()
             with torch.no_grad():
@@ -539,6 +547,7 @@ def main():
                         "val_loss": val_loss_accum,
                         "step": step,
                     }) + "\n")
+
 
             ...
         start = time.time()
