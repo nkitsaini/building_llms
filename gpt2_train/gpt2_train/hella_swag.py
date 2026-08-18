@@ -105,3 +105,5 @@ def evaluate(model_type: str, device: str):
 
         tokens = tokens.to(device)
         mask = mask.to(device)
+
+        logits = model(tokens).logits # input: [B, T], output: [B, T, vocab_size]
