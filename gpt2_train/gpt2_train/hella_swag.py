@@ -111,4 +111,6 @@ def evaluate(model_type: str, device: str):
         shift_logits = (logits[:, :-1, :]).contiguous() # [B, T-1, vocab_size]
         shift_tokens = (tokens[:, 1:]).contiguous() # [B, T-1]
 
-        flat_shift_logits = shift_logits.view()
+        flat_shift_logits = shift_logits.view(-1, shift_logits.size(-1))
+        flat_shift_tokens = shift_tokens.view(-1)
+        shift_losses = F.cross_entropy(flat_shift_logits, flat_shift_tokens, reduction='none')
