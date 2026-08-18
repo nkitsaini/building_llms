@@ -519,9 +519,9 @@ def main():
             model.eval()  # ty: ignore[unresolved-attribute]
             val_loader.reset()
             with torch.no_grad():
+                val_loss_accum = 0.0
                 val_loss_steps = 20
-                val_loss_steps = 20
-                for batch_idx in range(val_loss_steps):
+                for _ in range(val_loss_steps):
                     x, y = train_loader.next_batch()
                     x = x.to(device)
                     y = y.to(device)
