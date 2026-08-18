@@ -595,7 +595,7 @@ def main():
 
 
         if step % 2 == 0 or last_step:
-        if step % 250 == 0 or last_step:
+        # if step % 250 == 0 or last_step:
             val_start = time.time()
             validate_and_checkpoint(model=model, raw_model=raw_model, step=step, val_loader=val_loader)
             hella_swag_validate(model=model, step=step)
