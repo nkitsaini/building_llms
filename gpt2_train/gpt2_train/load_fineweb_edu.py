@@ -50,6 +50,8 @@ with mp.Pool() as pool:
     for tokens in tqdm(pool.imap(tokenize, idx, chunksize=16)):
 
         if token_count + len(tokens) < shard_size:
+            all_tokens_np[token_count:token_count + len(tokens)] = tokens
+            token_count += len(tokens)
         else:
             assert len(tokens) < shard_size
 # print (len(fw))
