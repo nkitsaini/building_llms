@@ -50,9 +50,9 @@ def render_example(example):
     endings = example["endings"]
 
     data = {
-        "label": label, # split
         "ctx_tokens": None, # setup
         "ending_tokens": [], # options
+        "label": label, # correct answer
     }
 
     # gather up all the tokens
