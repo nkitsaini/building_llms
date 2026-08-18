@@ -129,3 +129,20 @@ def evaluate(model_type: str, device: str):
         num_correct += int(pred == label)
         num_correct_norm += int(pred_norm == label)
         print(f"{num_total} acc_norm: {num_correct_norm}/{num_total}={num_correct_norm/num_total:.4f}")
+
+        # debug: pretty print a few examples, and the losses in each case
+        if num_total < 10:
+            print("---")
+            print(f"Context:\n {example['ctx']}")
+            print(f"Endings:")
+            for i, end in enumerate(example["endings"]):
+                print(f"{i} (loss: {avg_loss[i].item():.4f}) {end}")
+            print(f"predicted: {pred_norm}, actual: {label}")
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--model_type", type=str, default="gpt2", help="the model type to use")
+    parser.add_argument("-d", "--device", type=str, default="cuda", help="the device to use")
+    args = parser.parse_args()
+    evaluate(args.model_type, args.device)
