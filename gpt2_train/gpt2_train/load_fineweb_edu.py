@@ -15,7 +15,6 @@ shard_size = int(1e8) # 100M tokens per shard, total of 100 shards
 
 # download the dataset
 fw = load_dataset("HuggingFaceFW/fineweb-edu", name=remote_name, split="train")
-
 # %%
 if "__file__" in locals():
     output_dir = Path(__file__).parent.parent/'dataset'
@@ -34,7 +33,8 @@ idx[:5]
 enc = tiktoken.get_encoding('gpt2')
 eot = enc._special_tokens["<|endoftext|>"]
 
-def tokenize(doc: str):
+def tokenize(doc: dict):
+    text = doc['text']
 
 # print (len(fw))
 # print(fw[1])
