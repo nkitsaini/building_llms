@@ -35,6 +35,8 @@ eot = enc._special_tokens["<|endoftext|>"]
 
 def tokenize(doc: dict):
     text = doc['text']
+    tokens = [eot]
+    tokens = enc
 
 # print (len(fw))
 # print(fw[1])
