@@ -298,16 +298,16 @@ class GPT(nn.Module):
         num_decay_params = sum(p.numel() for p in decay_params)
         num_nondecay_params = sum(p.numel() for p in nondecay_params)
 
-        print(
+        log(
             f"num decayed parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters"
         )
-        print(
+        log(
             f"num non-decayed parameter tensors: {len(nondecay_params)}, with {num_nondecay_params:,} parameters"
         )
 
         fused_available = "fused" in inspect.signature(torch.optim.AdamW).parameters
         use_fused = fused_available and (device is not None and "cuda" in device)
-        print(f"using fused AdamW: {use_fused}")
+        log(f"using fused AdamW: {use_fused}")
         optimizer = torch.optim.AdamW(
             optim_groups, lr=learning_rate, betas=(0.9, 0.95), eps=1e-8, fused=use_fused
         )
@@ -384,8 +384,8 @@ class DataLoaderLite:
         self.data = load_dataset()
         enc = tiktoken.get_encoding("gpt2")
         self.tokens = torch.tensor(enc.encode(self.data.content))
-        print(f"loaded {len(self.tokens)} tokens")
-        print(f"1 epoch = {len(self.tokens) // (B * T)} batches")
+        log(f"loaded {len(self.tokens)} tokens")
+        log(f"1 epoch = {len(self.tokens) // (B * T)} batches")
 
         self.pos = self.B * self.T * self.process_rank
 
@@ -402,11 +402,11 @@ class DataLoaderLite:
         return x, y
 
 
-def predict(model):
+def predict(raw_model):
     num_return_sequences = 4
     max_length = 32
 
-    model.eval()
+    raw_model.eval()
     # model.to('cuda')
     #
     import tiktoken
@@ -419,11 +419,11 @@ def predict(model):
 
     import matplotlib.pyplot as plt
 
-    rng = torch.Generator(device=device).manual_seed(42)
+    rng = torch.Generator(device=device).manual_seed(42 + ddp_rank)
     while x.size(1) < max_length:
         with torch.no_grad():
             with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
-                logits, _ = model(x)
+                logits, _ = raw_model(x)
             logits = logits[:, -1, :]
             probs = F.softmax(logits, dim=-1)
 
@@ -476,7 +476,8 @@ def get_lr(it: int):
     ...
 
 
-def hella_swag_validate(*, model, step: int):
+def hella_swag_validate(*, raw_model, step: int):
+    raw_model.eval()
     num_correct_norm = 0
     num_total = 0
     for i, example in enumerate(iterate_examples("val")):
@@ -490,7 +491,7 @@ def hella_swag_validate(*, model, step: int):
         # get the logits
         with torch.no_grad():
             with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
-                logits, loss = model(tokens)
+                logits, loss = raw_model(tokens)
             pred_norm = get_most_likely_row(tokens, mask, logits)
         num_total += 1
         num_correct_norm += int(pred_norm == label)
@@ -578,12 +579,11 @@ def main():
 
     model = GPT(GPTConfig(vocab_size=50304))
     model.to(device)
-    model = torch.compile(model)
     raw_model = model
+    model = torch.compile(model)
     if ddp:
         model = DDP(model, device_ids=[ddp_local_rank])
-        raw_model = model.module
-    optimizer = raw_model.configure_optimizers(  # ty: ignore[unresolved-attribute]
+    optimizer = raw_model.configure_optimizers(
         weight_decay=0.1, learning_rate=6e-4, device=device
     )
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
@@ -597,8 +597,8 @@ def main():
         if step % 250 == 0 or last_step:
             val_start = time.time()
             validate_and_checkpoint(model=model, raw_model=raw_model, step=step, val_loader=val_loader)
-            hella_swag_validate(model=model, step=step)
-            predict(model)
+            hella_swag_validate(raw_model=raw_model, step=step)
+            predict(raw_model)
 
             val_end = time.time()
             log(f"Took {val_end - val_start:.3f}s in validation phase at step {step}")
@@ -615,13 +615,14 @@ def main():
             x, y = train_loader.next_batch()
             x = x.to(device)
             y = y.to(device)
+            if ddp:
+                # Add before model call, as forward pass also uses this field
+                model.require_backward_grad_sync = (micro_step == grad_accum_steps -1)  # ty: ignore[unresolved-attribute]
             with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
                 _, loss = model(x, y)
             # print(logits, loss)
             loss /= grad_accum_steps
             loss_accum += loss.detach()
-            if ddp:
-                model.require_backward_grad_sync = (micro_step == grad_accum_steps -1)  # ty: ignore[unresolved-attribute]
             loss.backward()
         if ddp:
             dist.all_reduce(loss_accum, op=dist.ReduceOp.AVG)
