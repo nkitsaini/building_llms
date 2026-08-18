@@ -1,3 +1,4 @@
+from pathlib import Path
 from dataclasses import dataclass
 import tiktoken
 
@@ -11,6 +12,7 @@ import matplotlib.pyplot as plt
 import math
 import typing as t
 import torch.nn as nn
+import numpy as np
 from torch.nn import functional as F
 import plotly.express as px
 import time
@@ -288,6 +290,10 @@ class FineWebDataLoaderLite:
         print(f"1 epoch = {len(self.tokens) // (B * T)} batches")
 
         self.pos = self.B * self.T * self.process_rank
+
+    def load_tokens(self, filepath: Path) -> torch.Tensor: # [T]
+        nparray = np.load(filepath)
+        return torch.from_numpy(nparray).type(torch.long)
 
     def next_batch(self) -> t.Tuple[torch.Tensor, torch.Tensor]:
         B, T = self.B, self.T
