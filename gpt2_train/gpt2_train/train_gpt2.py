@@ -413,7 +413,7 @@ def predict(model):
 
     enc = tiktoken.get_encoding("gpt2")
     tokens = enc.encode("Hello, I'm a language model,")
-    tokens = torch.tensor(tokens, dtype=torch.long)
+    tokens = torch.tensor(tokens, dtype=torch.long, device=device)
     tokens = tokens.unsqueeze(0).repeat(num_return_sequences, 1)
     x = tokens
 
