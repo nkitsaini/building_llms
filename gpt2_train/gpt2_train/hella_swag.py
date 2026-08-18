@@ -100,6 +100,10 @@ def evaluate(model_type: str, device: str):
     model = GPT2LMHeadModel.from_pretrained(model_type)
     model.to(device)  # ty: ignore[invalid-argument-type]
 
+    num_total = 0
+    num_correct = 0
+    num_correct_norm = 0
+
     for example in iterate_examples("val"):
         data, tokens, mask, label = render_example(example)
 
