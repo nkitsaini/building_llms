@@ -295,8 +295,11 @@ class FineWebDataLoaderLite:
         self.shards = sorted(shards)
         assert len(shards) > 0, f"no shards found for split {split}"
         log(f"found {len(shards)} shards for split {split}")
+        self.reset()
 
 
+    def reset(self):
+        self.current_shard = 0
         self.data = load_dataset()
         enc = tiktoken.get_encoding("gpt2")
         self.tokens = torch.tensor(enc.encode(self.data.content))
