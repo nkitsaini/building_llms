@@ -39,8 +39,30 @@ class GPTConfig:
     n_head: int = 12
     n_embd: int = 768
 
-master_process = True
-ddp = False
+# ----------------- ddp init
+ddp = int(os.environ.get("RANK", -1)) != -1
+
+if ddp:
+    assert torch.cuda.is_available(), "ddp without cuda?"  # AMD :(
+    ddp_rank = int(os.environ["RANK"])
+    ddp_local_rank = int(os.environ["LOCAL_RANK"])
+    ddp_world_size = int(os.environ["WORLD_SIZE"])
+    device = f"cuda:{ddp_local_rank}"
+    torch.cuda.set_device(device)
+    device_type = 'cuda'
+    master_process = ddp_rank == 0  # logging/checkpoint etc.
+else:
+    ddp_rank = 0
+    ddp_local_rank = 0
+    ddp_world_size = 1
+    master_process = True
+
+    device = "cpu"
+    device_type = 'cpu'
+    if torch.cuda.is_available():
+        device = "cuda"
+        device_type = 'cuda'
+# ----------------- ddp init end
 
 def log(*args, **kwargs):
     if master_process:
@@ -486,30 +508,9 @@ def validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, device: str
 def main():
     global master_process, ddp
 
-    ddp = int(os.environ.get("RANK", -1)) != -1
 
     if ddp:
-        assert torch.cuda.is_available(), "ddp without cuda?"  # AMD :(
         init_process_group(backend="nccl")  # What is nccl?
-        ddp_rank = int(os.environ["RANK"])
-        ddp_local_rank = int(os.environ["LOCAL_RANK"])
-        ddp_world_size = int(os.environ["WORLD_SIZE"])
-        device = f"cuda:{ddp_local_rank}"
-        torch.cuda.set_device(device)
-        device_type = 'cuda'
-        master_process = ddp_rank == 0  # logging/checkpoint etc.
-    else:
-        ddp_rank = 0
-        ddp_local_rank = 0
-        ddp_world_size = 1
-        master_process = True
-
-        device = "cpu"
-        device_type = 'cpu'
-        if torch.cuda.is_available():
-            device = "cuda"
-            device_type = 'cuda'
-
     torch.manual_seed(1337)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(1337)
