@@ -285,6 +285,7 @@ class FineWebDataLoaderLite:
         self.split = split
 
         self.data_root = get_fineweb_dir()
+        shards = os.listdir(self.data_root)
         self.data = load_dataset()
         enc = tiktoken.get_encoding("gpt2")
         self.tokens = torch.tensor(enc.encode(self.data.content))
