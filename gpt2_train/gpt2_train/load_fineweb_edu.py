@@ -47,7 +47,8 @@ with mp.Pool() as pool:
     shard_index = 0
     all_tokens_np = np.empty((shard_size,), dtype=np.uint16)
     token_count = 0
-    def write_file(split: str, data: np.ndarray):
+    def write_file(data: np.ndarray):
+        split = "val" if shard_index == 0 else "train"
         filename = os.path.join(output_dir, f"edufineweb_{split}_{shard_index:06d}")
         np.save(filename, data)
 
@@ -57,10 +58,9 @@ with mp.Pool() as pool:
             token_count += len(tokens)
         else:
             assert len(tokens) < shard_size
-            split = "val" if shard_index == 0 else "train"
             remainder = shard_size - token_count
             all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
-            write_file(split, all_tokens_np)
+            write_file(all_tokens_np)
             token_count = 0
             shard_index += 1
             all_tokens_np[0:len(tokens)-remainder] = tokens[remainder:]
