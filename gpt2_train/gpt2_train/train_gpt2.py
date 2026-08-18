@@ -419,16 +419,17 @@ def predict(model):
 
     import matplotlib.pyplot as plt
 
-    torch.manual_seed(42)
+    rng = torch.Generator(device=device).manual_seed(42)
     while x.size(1) < max_length:
         with torch.no_grad():
-            logits, _ = model(x)
+            with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
+                logits, _ = model(x)
             logits = logits[:, -1, :]
             probs = F.softmax(logits, dim=-1)
 
             topk_probs, topk_indices = torch.topk(probs, 50, dim=-1)
 
-            ix = torch.multinomial(topk_probs, 1)
+            ix = torch.multinomial(topk_probs, 1, generator=rng)
             xcol = torch.gather(topk_indices, -1, ix)
             x = torch.cat((x, xcol), dim=-1)
 
@@ -647,8 +648,6 @@ def main():
                     "step": step,
                     "loss_accum": loss_accum.item(),
                 }) + "\n")
-    if ddp:
-        destroy_process_group()
 
 
 if __name__ == "__main__":
