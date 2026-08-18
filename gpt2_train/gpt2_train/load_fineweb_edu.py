@@ -30,6 +30,10 @@ idx = list(range(len(fw)))
 random.shuffle(idx)
 idx[:5]
 
+# %%
+enc = tiktoken.get_encoding('gpt2')
+eot =
+
 # print (len(fw))
 # print(fw[1])
 # for i in fw:
