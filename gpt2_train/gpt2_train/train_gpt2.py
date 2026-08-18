@@ -641,8 +641,7 @@ def main():
             with open(get_log_filepath(), "a") as f:
                 f.write(json.dumps({
                     "step": step,
-                    "loss_accum": loss_accum.item()
-
+                    "loss_accum": loss_accum.item(),
                 }) + "\n")
     if ddp:
         destroy_process_group()
