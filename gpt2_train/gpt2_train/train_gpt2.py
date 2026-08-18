@@ -97,6 +97,7 @@ class MLP(nn.Module):
         self.c_fc = nn.Linear(config.n_embd, hidden)
         self.gelu = nn.GELU(approximate="tanh")
         self.c_proj = nn.Linear(hidden, config.n_embd)
+        self.c_proj.NANOGPT_SCALE_INIT = 1  # ty: ignore[invalid-assignment]
 
     def forward(self, x: torch.Tensor):
         x = self.c_fc(x)
