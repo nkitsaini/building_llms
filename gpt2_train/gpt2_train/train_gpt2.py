@@ -40,6 +40,7 @@ class GPTConfig:
     n_embd: int = 768
 
 master_process = True
+ddp = False
 
 def log(*args, **kwargs):
     if master_process:
@@ -448,8 +449,42 @@ def get_lr(it: int):
     ...
 
 
+def validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, device: str, device_type: str, step: int):
+    ## ========= Validation loss
+    model.eval()
+    val_loader.reset()
+    with torch.no_grad():
+        val_loss_accum = 0.0
+        val_loss_steps = 20
+        for _ in range(val_loss_steps):
+            x, y = val_loader.next_batch()
+            x = x.to(device)
+            y = y.to(device)
+            with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
+                logits, loss = model(x, y)
+            val_loss_accum += (loss/val_loss_steps).detach()
+    if ddp:
+        dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
+    if master_process:
+        log(f"validation loss: {val_loss_accum.item():.4f}")
+        log_file = get_log_filepath()
+        with open(log_file, "a") as f:
+            f.write(json.dumps({
+                "val_loss": val_loss_accum.item(),
+                "step": step,
+            }) + "\n")
+        ## ========= Checkpointing
+        if step != 0 and step % 5000 == 0:
+            ck_path = get_checkpoint_dir()/f'model_{step:05d}.pt'
+            torch.save( {
+                "model": raw_model.state_dict(),
+                'config': raw_model.config,
+                'step': step,
+                'val_loss': val_loss_accum.item()
+            }, ck_path)
+
 def main():
-    global master_process
+    global master_process, ddp
 
     ddp = int(os.environ.get("RANK", -1)) != -1
 
@@ -519,8 +554,6 @@ def main():
 
 
         if step % 250 == 0 or last_step:
-
-
             ## ========= Validation loss
             model.eval()  # ty: ignore[unresolved-attribute]
             val_loader.reset()
