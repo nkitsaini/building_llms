@@ -10,6 +10,7 @@ import random
 from pathlib import Path
 from itertools import batched
 import math
+from .dataset_helpers import get_output_dir
 
 local_dir = "edu_fineweb10B"
 remote_name = "sample-10BT"
@@ -19,11 +20,7 @@ shard_size = int(1e8) # 100M tokens per shard, total of 100 shards
 # download the dataset
 fw = load_dataset("HuggingFaceFW/fineweb-edu", name=remote_name, split="train")
 # %%
-if "__file__" in locals():
-    output_dir = Path(__file__).parent.parent/'dataset'
-else:
-    # in jupyter notebook
-    output_dir = Path(os.getcwd()) / 'gpt2_train'/'dataset'
+output_dir = get_output_dir()
 
 # %%
 
