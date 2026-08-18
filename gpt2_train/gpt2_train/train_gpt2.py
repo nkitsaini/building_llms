@@ -273,6 +273,34 @@ class GPT(nn.Module):
         )
         return optimizer
 
+class FineWebDataLoaderLite:
+    def __init__(self, B: int, T: int, process_rank: int, num_processes: int, split: str):
+        assert split in ['train', 'val']
+        self.B, self.T = B, T
+        self.process_rank = process_rank
+        self.num_processes = num_processes
+        self.split = split
+
+        self.data = load_dataset()
+        enc = tiktoken.get_encoding("gpt2")
+        self.tokens = torch.tensor(enc.encode(self.data.content))
+        print(f"loaded {len(self.tokens)} tokens")
+        print(f"1 epoch = {len(self.tokens) // (B * T)} batches")
+
+        self.pos = self.B * self.T * self.process_rank
+
+    def next_batch(self) -> t.Tuple[torch.Tensor, torch.Tensor]:
+        B, T = self.B, self.T
+        buf = self.tokens[self.pos : self.pos + B * T + 1]
+        x = buf[:-1].view(B, T)
+        y = buf[1:].view(B, T)
+
+        self.pos += B * T * self.num_processes
+        if self.pos + (B * T * self.num_processes + 1) > len(self.tokens):  # ???
+            self.pos = self.B * self.T * self.process_rank
+
+        return x, y
+
 
 class DataLoaderLite:
     def __init__(self, B: int, T: int, process_rank: int, num_processes: int):
