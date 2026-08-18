@@ -634,9 +634,14 @@ def main():
         tokens_processed = (train_loader.T * train_loader.B) * grad_accum_steps * ddp_world_size
         tps = (tokens_processed) / duration
         if master_process:
-            print(
+            log(
                 f"step {step} | loss: {loss_accum.item():.6f} | lr: {lr:.4e} norm: {norm:.4f} | duration: {duration:.3f}s | tps: {tps:.2f}"
             )
+
+            with open(get_log_filepath(), "a") as f:
+                f.write(json.dumps({
+
+                }) + "\n")
     if ddp:
         destroy_process_group()
     # logits, loss = model(x, y)
