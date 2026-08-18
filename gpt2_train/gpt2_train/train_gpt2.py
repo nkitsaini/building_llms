@@ -593,10 +593,15 @@ def main():
         last_step = step == max_steps -1
 
 
+
         if step % 2 == 0 or last_step:
+            val_start = time.time()
             validate_and_checkpoint(model=model, raw_model=raw_model, step=step, val_loader=val_loader)
             hella_swag_validate(model=model, step=step)
             predict(model)
+
+            val_end = time.time()
+            log(f"Took {val_end - val_start:.3f}s in validation phase at step {step}")
 
         start = time.time()
         # reset_grad = step % grad_accum_steps == 0
