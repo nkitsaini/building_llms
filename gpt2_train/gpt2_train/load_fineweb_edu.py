@@ -25,6 +25,7 @@ else:
 # %%
 
 
+random.seed(42)
 idx = list(range(len(fw)))
 random.shuffle(idx)
 idx[:5]
@@ -33,8 +34,8 @@ idx[:5]
 enc = tiktoken.get_encoding('gpt2')
 eot = enc._special_tokens["<|endoftext|>"]
 
-def tokenize(doc: dict):
-    text = doc['text']
+def tokenize(doc_idx: int):
+    text = fw[doc_idx]['text']
     tokens = [eot]
     tokens.extend(enc.encode_ordinary(text))
     tokens_np = np.array(tokens)
@@ -46,7 +47,7 @@ with mp.Pool() as pool:
     shard_index = 0
     all_tokens_np = np.empty((shard_size,), dtype=np.uint16)
     token_count = 0
-    for tokens in tqdm(pool.imap(tokenize, fw, chunksize=16)):
+    for tokens in tqdm(pool.imap(tokenize, idx, chunksize=16)):
 
         if token_count + len(tokens) < shard_size
 
