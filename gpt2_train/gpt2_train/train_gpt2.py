@@ -517,6 +517,10 @@ def main():
         if step % 250 == 0:
             model.eval()  # ty: ignore[unresolved-attribute]
             val_loader.reset()
+            for batch_idx in range(300):
+                x, y = train_loader.next_batch()
+                x = x.to(device)
+                y = y.to(device)
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
