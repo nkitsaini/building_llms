@@ -512,6 +512,10 @@ def main():
     )
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
     for step in range(max_steps):
+
+
+        if step % 250 == 0:
+            ...
         start = time.time()
         # reset_grad = step % grad_accum_steps == 0
         # optimize_grad = (step+1) % grad_accum_steps == 0
@@ -520,7 +524,7 @@ def main():
         optimizer.zero_grad()
         loss_accum = torch.zeros(1, device=device)
         for micro_step in range(grad_accum_steps):
-            x, y = loader.next_batch()
+            x, y = train_loader.next_batch()
             x = x.to(device)
             y = y.to(device)
             with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
@@ -544,7 +548,7 @@ def main():
         if torch.cuda.is_available():
             torch.cuda.synchronize()  # wait for gpu operations to settle
         duration = time.time() - start
-        tokens_processed = (loader.T * loader.B) * grad_accum_steps * ddp_world_size
+        tokens_processed = (train_loader.T * train_loader.B) * grad_accum_steps * ddp_world_size
         tps = (tokens_processed) / duration
         if master_process:
             print(
