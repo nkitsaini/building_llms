@@ -10,10 +10,15 @@ def get_output_dir() -> Path:
     else:
         # in jupyter notebook
         output_dir = Path(os.getcwd()) / 'gpt2_train'/'dataset'
+    assert output_dir.exists(), f"Expected {output_dir} to be present"
     return output_dir
 
 def get_hellaswag_dir() -> Path:
-    return get_output_dir()/'hello_swag'
+    d =  get_output_dir()/'hellaswag'
+    d.mkdir(exist_ok=True)
+    return d
 
 def get_fineweb_dir() -> Path:
-    return get_output_dir()/'fineweb_edu'
+    d = get_output_dir()/'fineweb_edu'
+    d.mkdir(exist_ok=True)
+    return d
