@@ -495,7 +495,11 @@ def main():
 
     print("I am gpu", ddp_rank)
 
-    loader = DataLoaderLite(B, T, process_rank=ddp_rank, num_processes=ddp_world_size)
+    # loader = DataLoaderLite(B, T, process_rank=ddp_rank, num_processes=ddp_world_size)
+    train_loader = FineWebDataLoaderLite(B, T, process_rank=ddp_rank, num_processes=ddp_world_size, split="train")
+    val_loader = FineWebDataLoaderLite(B, T, process_rank=ddp_rank, num_processes=ddp_world_size, split="val")
+
+
     model = GPT(GPTConfig(vocab_size=50304))
     model.to(device)
     model = torch.compile(model)
