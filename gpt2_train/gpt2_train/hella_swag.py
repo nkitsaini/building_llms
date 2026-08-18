@@ -35,10 +35,14 @@ def download_file(url: str, fpath: str | Path, chunk_size=1024):
             size = file.write(data)
             bar.update(size)
 
+def file_path(split: str):
+    return output_dir/f"hellaswag_{split}.jsonl"
+
+
 def download(split: str):
     """Downloads HellaSwag DATA_CACHE_DIR"""
     data_url = hellaswags[split]
-    data_filepath = output_dir/f"hellaswag_{split}.jsonl"
+    data_filepath = file_path(split)
     if not os.path.exists(data_filepath):
         print(f"Downloading {data_url} to {data_filepath}...")
         download_file(data_url, data_filepath)
@@ -80,3 +84,11 @@ def render_example(example):
         mask, # tensor(4, max_len) =>   000 + 111111 + 000
         label, # `int` correct answer index
     )
+
+def iterate_examples(split):
+    # there are 10,042 examples in total in val
+    download(split)
+    with open(file_path(split)) as f:
+        for line in f:
+            example = json.loads(line)
+            yield example
