@@ -442,10 +442,7 @@ def main():
             x, y = loader.next_batch()
             x = x.to(device)
             y = y.to(device)
-            if torch.cuda.is_available():
-                with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
-                    _, loss = model(x, y)
-            else:
+            with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
                 _, loss = model(x, y)
             # print(logits, loss)
             loss /= grad_accum_steps
