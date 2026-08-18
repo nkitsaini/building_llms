@@ -116,4 +116,4 @@ def evaluate(model_type: str, device: str):
         shift_losses = F.cross_entropy(flat_shift_logits, flat_shift_tokens, reduction='none') # [B*(T-1)]
         shift_losses = shift_losses.view(tokens.size(0), -1)# [B, T-1]
 
-        shift_mask = (mask[..., 1:])
+        shift_mask = (mask[..., 1:]) # shift mask
