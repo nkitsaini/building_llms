@@ -118,3 +118,6 @@ def evaluate(model_type: str, device: str):
         shift_losses = shift_losses.view(tokens.size(0), -1)# [B, T-1]
 
         masked_shift_losses = shift_losses * shift_mask # only get losses for mask
+
+        sum_loss = masked_shift_losses.sum(dim=1) # [B]
+        avg_loss = sum_loss / shift_mask.sum(dim=1) # [B]
