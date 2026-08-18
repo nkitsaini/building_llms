@@ -316,7 +316,7 @@ class FineWebDataLoaderLite:
 
         self.pos += B * T * self.num_processes
         if self.pos + (B * T * self.num_processes + 1) > len(self.tokens):  # ???
-            self.current
+            self.current_shard = (self.current_shard + 1) %
             self.pos = self.B * self.T * self.process_rank
 
         return x, y
