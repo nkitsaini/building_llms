@@ -57,6 +57,7 @@ def main():
         def write_file(data: np.ndarray):
             split = "val" if shard_index == 0 else "train"
             filename = os.path.join(output_dir, f"edufineweb_{split}_{shard_index:06d}")
+            tqdm.write(f"Saving {len(data)} tokens to {filename}\n")
             np.save(filename, data)
 
         proc_inputs = batched(idx, 100)
