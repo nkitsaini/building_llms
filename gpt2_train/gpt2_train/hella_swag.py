@@ -101,4 +101,7 @@ def evaluate(model_type: str, device: str):
     model.to(device)  # ty: ignore[invalid-argument-type]
 
     for example in iterate_examples("val"):
-        data, tokens, mask,
+        data, tokens, mask, label = render_example(example)
+
+        tokens = tokens.to(device)
+        mask = mask.to(device)
