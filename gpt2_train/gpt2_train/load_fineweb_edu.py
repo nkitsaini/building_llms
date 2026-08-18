@@ -47,14 +47,15 @@ with mp.Pool() as pool:
     shard_index = 0
     all_tokens_np = np.empty((shard_size,), dtype=np.uint16)
     token_count = 0
-    for tokens in tqdm(pool.imap(tokenize, idx, chunksize=16)):
 
+    for tokens in tqdm(pool.imap(tokenize, idx, chunksize=16)):
         if token_count + len(tokens) < shard_size:
             all_tokens_np[token_count:token_count + len(tokens)] = tokens
             token_count += len(tokens)
         else:
             assert len(tokens) < shard_size
             split = "val" if shard_index == 0 else "train"
+            remainder =
 
 # print (len(fw))
 # print(fw[1])
