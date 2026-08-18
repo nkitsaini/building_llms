@@ -518,7 +518,7 @@ def main():
 
         ## ========= Checkpointing
         if step != 0 and step % 5000 == 0:
-            dir = get_checkpoint_dir()
+            ck_path = get_checkpoint_dir()/f'model_{step}'
             dir.sav
 
         if step % 250 == 0 or last_step:
