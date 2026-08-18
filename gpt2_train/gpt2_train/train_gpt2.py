@@ -471,7 +471,7 @@ def get_lr(it: int):
     ...
 
 
-def validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, device: str, device_type: str, step: int):
+def validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, step: int):
     ## ========= Validation loss
     model.eval()
     val_loader.reset()
