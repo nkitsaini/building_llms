@@ -47,6 +47,8 @@ with mp.Pool() as pool:
     shard_index = 0
     all_tokens_np = np.empty((shard_size,), dtype=np.uint16)
     token_count = 0
+    def write_file(split: str, data: np.ndarray):
+
 
     for tokens in tqdm(pool.imap(tokenize, idx, chunksize=16)):
         if token_count + len(tokens) < shard_size:
@@ -57,6 +59,8 @@ with mp.Pool() as pool:
             split = "val" if shard_index == 0 else "train"
             remainder = shard_size - token_count
             all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
+
+
 
 # print (len(fw))
 # print(fw[1])
