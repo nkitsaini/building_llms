@@ -286,6 +286,8 @@ class FineWebDataLoaderLite:
 
         data_root = get_fineweb_dir()
         shards = os.listdir(data_root)
+        shards = [s for s in shards if split in s]
+        shards = sorted(shards)
 
 
         self.data = load_dataset()
