@@ -10,4 +10,10 @@ from transformers import GPT2LMHeadModel
 from .dataset_helpers import get_hellaswag_dir
 
 
+hellaswags = {
+    "train": "https://raw.githubusercontent.com/rowanz/hellaswag/master/data/hellaswag_train.jsonl",
+    "val": "https://raw.githubusercontent.com/rowanz/hellaswag/master/data/hellaswag_val.jsonl",
+    "test": "https://raw.githubusercontent.com/rowanz/hellaswag/master/data/hellaswag_test.jsonl",
+}
+
 output_dir = get_hellaswag_dir()
