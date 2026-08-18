@@ -60,8 +60,9 @@ def main():
             tqdm.write(f"Saving {len(data)} tokens to {filename}\n")
             np.save(filename, data)
 
-        proc_inputs = batched(idx, 100)
-        proc_input_count = math.ceil(len(idx)//100)
+        batch_size = 1
+        proc_inputs = batched(idx, batch_size)
+        proc_input_count = math.ceil(len(idx)//batch_size)
         for tokens_batched in tqdm(pool.imap(tokenize, proc_inputs, chunksize=16), total=proc_input_count):
             for tokens in tokens_batched:
                 if token_count + len(tokens) < shard_size:
