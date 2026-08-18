@@ -108,4 +108,4 @@ def evaluate(model_type: str, device: str):
 
         logits = model(tokens).logits # input: [B, T], output: [B, T, vocab_size]
 
-        shift_logits = logits[..., :-1, :]
+        shift_logits = (logits[..., :-1, :]).contiguous() # [B, T-1, vocab_size]
