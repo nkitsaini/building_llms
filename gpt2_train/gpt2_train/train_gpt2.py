@@ -515,6 +515,8 @@ def main():
 
 
         if step % 250 == 0:
+            model.eval()  # ty: ignore[unresolved-attribute]
+            model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
         # reset_grad = step % grad_accum_steps == 0
