@@ -35,10 +35,12 @@ def download_file(url: str, fpath: str | Path, chunk_size=1024):
             size = file.write(data)
             bar.update(size)
 
-def download(split):
+def download(split: str):
     """Downloads HellaSwag DATA_CACHE_DIR"""
     data_url = hellaswags[split]
     data_filepath = output_dir/f"hellaswag_{split}.jsonl"
     if not os.path.exists(data_filepath):
         print(f"Downloading {data_url} to {data_filepath}...")
         download_file(data_url, data_filepath)
+    else:
+        print(f"File {data_filepath} already exists for split {split} from {data_url}")
