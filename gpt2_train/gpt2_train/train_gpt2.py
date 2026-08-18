@@ -1,3 +1,10 @@
+"""
+
+Launch:
+
+torchrun --standalone --nproc_per_node=8 train_gpt2.py
+
+"""
 from pathlib import Path
 from dataclasses import dataclass
 import tiktoken
