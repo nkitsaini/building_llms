@@ -110,3 +110,5 @@ def evaluate(model_type: str, device: str):
 
         shift_logits = (logits[:, :-1, :]).contiguous() # [B, T-1, vocab_size]
         shift_tokens = (tokens[:, 1:]).contiguous() # [B, T-1]
+
+        flat_shift_logits = shift_logits.view()
