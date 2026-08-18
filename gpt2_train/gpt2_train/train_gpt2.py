@@ -536,7 +536,7 @@ def validate_and_checkpoint(*, val_loader: FineWebDataLoaderLite, model, raw_mod
                 "step": step,
             }) + "\n")
         ## ========= Checkpointing
-        if step != 0 and step % 5000 == 0:
+        if step != 0 and (step % 5000 == 0 or step == max_steps -1):
             ck_path = get_checkpoint_dir()/f'model_{step:05d}.pt'
             torch.save( {
                 "model": raw_model.state_dict(),
@@ -591,7 +591,6 @@ def main():
     for step in range(max_steps):
 
         last_step = step == max_steps -1
-
 
 
         if step % 250 == 0 or last_step:
