@@ -383,6 +383,7 @@ def main():
         ddp_world_size = int(os.environ["WORLD_SIZE"])
         device = f"cuda:{ddp_local_rank}"
         torch.cuda.set_device(device)
+        device_type = 'cuda'
         master_process = ddp_rank == 0  # logging/checkpoint etc.
     else:
         ddp_rank = 0
@@ -391,8 +392,10 @@ def main():
         master_process = True
 
         device = "cpu"
+        device_type = 'cpu'
         if torch.cuda.is_available():
             device = "cuda"
+            device_type = 'cuda'
 
     torch.manual_seed(1337)
     if torch.cuda.is_available():
