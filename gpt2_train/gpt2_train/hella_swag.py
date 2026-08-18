@@ -46,8 +46,7 @@ def download(split: str):
     if not os.path.exists(data_filepath):
         print(f"Downloading {data_url} to {data_filepath}...")
         download_file(data_url, data_filepath)
-    else:
-        print(f"File {data_filepath} already exists for split {split} from {data_url}")
+
 def render_example(example):
     ctx = example["ctx"]
     label = example["label"]
