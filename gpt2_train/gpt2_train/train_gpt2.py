@@ -421,6 +421,7 @@ def get_lr(it: int):
 
 
 def main():
+    global master_process
 
     ddp = int(os.environ.get("RANK", -1)) != -1
 
