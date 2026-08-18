@@ -66,7 +66,7 @@ def render_example(example):
         mask_rows.append([0]*len(ctx_tokens) + [1]*len(end_tokens))
         data["ending_tokens"].append(end_tokens)
 
-    # have to be careful during the collation because the number of tokens in each row can differ
+    # Make the sizes same for final tokens
     max_len = max(len(row) for row in tok_rows)
     tokens = torch.zeros((4, max_len), dtype=torch.long)
     mask = torch.zeros((4, max_len), dtype=torch.long)
@@ -74,4 +74,4 @@ def render_example(example):
         tokens[i, :len(tok_row)] = torch.tensor(tok_row)
         mask[i, :len(mask_row)] = torch.tensor(mask_row)
 
-    return data, tokens, mask, label
+    return (data, tokens, mask, label,)
