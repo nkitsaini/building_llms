@@ -94,4 +94,4 @@ def iterate_examples(split):
             yield example
 
 @torch.no_grad()
-def evaluate(model_type: str, )
+def evaluate(model_type: str, device: str):
