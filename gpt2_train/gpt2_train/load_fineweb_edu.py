@@ -46,7 +46,7 @@ with mp.Pool() as pool:
     shard_index = 0
     all_tokens_np = np.empty((shard_size,), dtype=np.uint16)
     token_count = 0
-    for tokens in tqdm()
+    for tokens in tqdm(pool.imap(tokenize, fw, chunksize=16)):
 
 # print (len(fw))
 # print(fw[1])
