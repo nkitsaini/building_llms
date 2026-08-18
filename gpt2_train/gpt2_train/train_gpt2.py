@@ -2,7 +2,7 @@
 
 Launch:
 
-torchrun --standalone --nproc_per_node=8 train_gpt2.py
+uv run torchrun --standalone --nproc_per_node=8 -m gpt2_train.train_gpt2
 
 """
 from pathlib import Path
