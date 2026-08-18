@@ -470,7 +470,7 @@ def get_lr(it: int):
     ...
 
 
-def hella_swag_validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, step: int):
+def hella_swag_validate(*, model, step: int):
     num_correct_norm = 0
     num_total = 0
     for i, example in enumerate(iterate_examples("val")):
@@ -506,7 +506,7 @@ def hella_swag_validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, 
                 "acc_norm": acc_norm
             }) + "\n")
 
-def validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, step: int):
+def validate_and_checkpoint(*, val_loader: FineWebDataLoaderLite, model, raw_model, step: int):
     ## ========= Validation loss
     model.eval()
     val_loader.reset()
@@ -590,47 +590,16 @@ def main():
 
 
         if step % 250 == 0 or last_step:
-            ## ========= Validation loss
-            model.eval()  # ty: ignore[unresolved-attribute]
-            val_loader.reset()
-            with torch.no_grad():
-                val_loss_accum = 0.0
-                val_loss_steps = 20
-                for _ in range(val_loss_steps):
-                    x, y = train_loader.next_batch()
-                    x = x.to(device)
-                    y = y.to(device)
-                    with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
-                        logits, loss = model(x, y)
-                    val_loss_accum += (loss/val_loss_steps).detach()
-            if ddp:
-                dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
-            if master_process:
-                log(f"validation loss: {val_loss_accum.item():.4f}")
-                log_file = get_log_filepath()
-                with open(log_file, "a") as f:
-                    f.write(json.dumps({
-                        "val_loss": val_loss_accum.item(),
-                        "step": step,
-                    }) + "\n")
-                ## ========= Checkpointing
-                if step != 0 and step % 5000 == 0:
-                    ck_path = get_checkpoint_dir()/f'model_{step:05d}.pt'
-                    torch.save( {
-                        "model": raw_model.state_dict(),  # ty: ignore[unresolved-attribute]
-                        'config': raw_model.config,  # ty: ignore[unresolved-attribute]
-                        'step': step,
-                        'val_loss': val_loss_accum.item()
-                    }, ck_path)
+            validate_and_checkpoint(model=model, raw_model=raw_model, step=step, val_loader=val_loader)
+            hella_swag_validate(model=model, step=step)
+            predict(model)
 
-
-            ...
         start = time.time()
         # reset_grad = step % grad_accum_steps == 0
         # optimize_grad = (step+1) % grad_accum_steps == 0
 
         # if reset_grad:
-        model.train()
+        model.train()  # ty: ignore[unresolved-attribute]
         optimizer.zero_grad()
         loss_accum = torch.zeros(1, device=device)
         for micro_step in range(grad_accum_steps):
