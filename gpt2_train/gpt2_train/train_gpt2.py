@@ -403,8 +403,8 @@ class DataLoaderLite:
 
 
 def predict(model):
-    num_return_sequences = 5
-    max_length = 30
+    num_return_sequences = 4
+    max_length = 32
 
     model.eval()
     # model.to('cuda')
