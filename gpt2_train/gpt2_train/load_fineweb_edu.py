@@ -60,6 +60,8 @@ with mp.Pool() as pool:
             split = "val" if shard_index == 0 else "train"
             remainder = shard_size - token_count
             all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
+            write_file(split, all_tokens_np)
+            token_count = 0
 
 
 
