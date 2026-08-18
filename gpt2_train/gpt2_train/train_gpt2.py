@@ -549,8 +549,6 @@ def main():
     global master_process, ddp
 
 
-    if ddp:
-        init_process_group(backend="nccl")  # What is nccl?
     torch.manual_seed(1337)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(1337)
@@ -659,6 +657,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if ddp:
+        init_process_group(backend="nccl")  # What is nccl?
+    try:
+        main()
+    finally:
+        if ddp:
+            destroy_process_group()
+
     # model = GPT.from_pretrained('gpt2')
     # print("didn't crash!")
