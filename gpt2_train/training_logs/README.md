@@ -1,0 +1,8 @@
+(main) root@C.48020123:/workspace/building_llms/gpt2_train$ sha256sum dataset/checkpoint/* dataset/logs/*
+c5f604bf6985981cc6d9926f218205ca0c11661fc30e1e965e43e0d329afb661  dataset/checkpoint/model_05000.pt
+aa978627c786e079d99e0b2ae4849312e83ef3281af1a973560035d869f3b3ac  dataset/checkpoint/model_10000.pt
+4bc1e40026b0f31eebb4bc6ff72a5558f55167d89b06cde9f3777ad69f4b0cb0  dataset/checkpoint/model_15000.pt
+b6d99f8e311dba3d38d5644baff7f74765f1aa33b5d3bc8273f5933be2aa588a  dataset/checkpoint/model_19072.pt
+b7b2ab3c783cb38d609a1b58c6c1672fc17844ed0a32db8693a7b7a738db85e3  dataset/logs/logs.jsonl
+e7ce1de85769c27f346988b6be009645771bab6ba2235f38e6bfa1b111868caa  dataset/logs/tee.txt
+
