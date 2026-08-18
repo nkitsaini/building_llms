@@ -292,8 +292,9 @@ class FineWebDataLoaderLite:
         self.pos = self.B * self.T * self.process_rank
 
     def load_tokens(self, filepath: Path) -> torch.Tensor: # [T]
-        nparray = np.load(filepath)
-        return torch.from_numpy(nparray).type(torch.long)
+        npt = np.load(filepath)
+        npt = npt.astype(np.int32) # ?? why? (karpathy added after video)
+        return torch.tensor(npt, dtype=torch.long)
 
     def next_batch(self) -> t.Tuple[torch.Tensor, torch.Tensor]:
         B, T = self.B, self.T
