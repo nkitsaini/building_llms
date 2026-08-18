@@ -55,7 +55,8 @@ with mp.Pool() as pool:
         else:
             assert len(tokens) < shard_size
             split = "val" if shard_index == 0 else "train"
-            remainder =
+            remainder = shard_size - token_count
+            all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
 
 # print (len(fw))
 # print(fw[1])
