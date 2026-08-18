@@ -516,14 +516,6 @@ def main():
 
         last_step = step == max_steps -1
 
-        ## ========= Checkpointing
-        if step != 0 and step % 5000 == 0:
-            ck_path = get_checkpoint_dir()/f'model_{step:05d}.pt'
-            torch.save( {
-                "model": raw_model.state_dict(),  # ty: ignore[unresolved-attribute]
-                'config': raw_model.config,  # ty: ignore[unresolved-attribute]
-                'step': step,
-            }, ck_path)
 
 
         if step % 250 == 0 or last_step:
@@ -549,9 +541,18 @@ def main():
                 log_file = get_log_filepath()
                 with open(log_file, "a") as f:
                     f.write(json.dumps({
-                        "val_loss": val_loss_accum,
+                        "val_loss": val_loss_accum.item(),
                         "step": step,
                     }) + "\n")
+                ## ========= Checkpointing
+                if step != 0 and step % 5000 == 0:
+                    ck_path = get_checkpoint_dir()/f'model_{step:05d}.pt'
+                    torch.save( {
+                        "model": raw_model.state_dict(),  # ty: ignore[unresolved-attribute]
+                        'config': raw_model.config,  # ty: ignore[unresolved-attribute]
+                        'step': step,
+                        'val_loss': val_loss_accum.item()
+                    }, ck_path)
 
 
             ...
