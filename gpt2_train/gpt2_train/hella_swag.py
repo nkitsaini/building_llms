@@ -17,3 +17,4 @@ hellaswags = {
 }
 
 output_dir = get_hellaswag_dir()
+enc = tiktoken.get_encoding("gpt2")
