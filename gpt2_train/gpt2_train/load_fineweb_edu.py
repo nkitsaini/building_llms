@@ -37,7 +37,10 @@ def tokenize(doc: dict):
     text = doc['text']
     tokens = [eot]
     tokens.extend(enc.encode_ordinary(text))
-        assert (0 <= tokens_np).all() and (tokens_np < 2**16).all(), "token dictionary too large for uint16"
+    tokens_np = np.array(tokens)
+    assert (0 <= tokens_np).all() and (tokens_np < 2**16).all(), "token dictionary too large for uint16"
+    tokens_np_uint16 = tokens_np.astype(np.uint16)
+    return tokens_np_uint16
 
 # print (len(fw))
 # print(fw[1])
