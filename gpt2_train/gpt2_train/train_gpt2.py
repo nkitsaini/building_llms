@@ -593,7 +593,7 @@ def main():
         last_step = step == max_steps -1
 
 
-        if step % 250 == 0 or last_step:
+        if step % 2 == 0 or last_step:
             validate_and_checkpoint(model=model, raw_model=raw_model, step=step, val_loader=val_loader)
             hella_swag_validate(model=model, step=step)
             predict(model)
