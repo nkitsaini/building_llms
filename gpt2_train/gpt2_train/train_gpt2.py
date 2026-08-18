@@ -301,13 +301,6 @@ class FineWebDataLoaderLite:
     def reset(self):
         self.current_shard = 0
         self.tokens = self.load_tokens(self.shards[self.current_shard])
-
-        self.data = load_dataset()
-        enc = tiktoken.get_encoding("gpt2")
-        self.tokens = torch.tensor(enc.encode(self.data.content))
-        print(f"loaded {len(self.tokens)} tokens")
-        print(f"1 epoch = {len(self.tokens) // (B * T)} batches")
-
         self.pos = self.B * self.T * self.process_rank
 
     def load_tokens(self, filepath: Path) -> torch.Tensor: # [T]
