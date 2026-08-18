@@ -32,7 +32,7 @@ idx[:5]
 
 # %%
 enc = tiktoken.get_encoding('gpt2')
-eot =
+eot = enc._special_token["<|endoftext|>"]
 
 # print (len(fw))
 # print(fw[1])
