@@ -62,6 +62,8 @@ with mp.Pool() as pool:
             all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
             write_file(split, all_tokens_np)
             token_count = 0
+            all_tokens_np[0:len(tokens)-remainder] = tokens[remainder:]
+            token_count = len(tokens)-remainder
 
 
 
