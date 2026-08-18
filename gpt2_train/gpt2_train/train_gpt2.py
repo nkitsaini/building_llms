@@ -500,7 +500,7 @@ def hella_swag_validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, 
         num_correct_norm = num_correct_norm.item()
     acc_norm = num_correct_norm / num_total
     if master_process:
-        print(f"HellaSwag accuracy: {num_correct_norm}/{num_total}={acc_norm:.4f}")
+        log(f"HellaSwag accuracy: {num_correct_norm}/{num_total}={acc_norm:.4f}")
         log_file = get_log_filepath()
         with open(log_file, "a") as f:
             f.write(json.dumps({
