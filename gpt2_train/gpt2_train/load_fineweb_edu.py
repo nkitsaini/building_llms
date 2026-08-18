@@ -43,31 +43,34 @@ def tokenize(doc_idx: int):
     tokens_np_uint16 = tokens_np.astype(np.uint16)
     return tokens_np_uint16
 
-with mp.Pool() as pool:
-    shard_index = 0
-    all_tokens_np = np.empty((shard_size,), dtype=np.uint16)
-    token_count = 0
-    def write_file(data: np.ndarray):
-        split = "val" if shard_index == 0 else "train"
-        filename = os.path.join(output_dir, f"edufineweb_{split}_{shard_index:06d}")
-        np.save(filename, data)
+def main():
+    with mp.Pool() as pool:
+        shard_index = 0
+        all_tokens_np = np.empty((shard_size,), dtype=np.uint16)
+        token_count = 0
+        def write_file(data: np.ndarray):
+            split = "val" if shard_index == 0 else "train"
+            filename = os.path.join(output_dir, f"edufineweb_{split}_{shard_index:06d}")
+            np.save(filename, data)
 
-    for tokens in tqdm(pool.imap(tokenize, idx, chunksize=16)):
-        if token_count + len(tokens) < shard_size:
-            all_tokens_np[token_count:token_count + len(tokens)] = tokens
-            token_count += len(tokens)
-        else:
-            assert len(tokens) < shard_size
-            remainder = shard_size - token_count
-            all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
-            write_file(all_tokens_np)
-            token_count = 0
-            shard_index += 1
-            all_tokens_np[0:len(tokens)-remainder] = tokens[remainder:]
-            token_count = len(tokens)-remainder
-    if token_count != 0:
-        write_file(all_tokens_np[:token_count])
+        for tokens in tqdm(pool.imap(tokenize, idx, chunksize=16)):
+            if token_count + len(tokens) < shard_size:
+                all_tokens_np[token_count:token_count + len(tokens)] = tokens
+                token_count += len(tokens)
+            else:
+                assert len(tokens) < shard_size
+                remainder = shard_size - token_count
+                all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
+                write_file(all_tokens_np)
+                token_count = 0
+                shard_index += 1
+                all_tokens_np[0:len(tokens)-remainder] = tokens[remainder:]
+                token_count = len(tokens)-remainder
+        if token_count != 0:
+            write_file(all_tokens_np[:token_count])
 
+if __name__ == "__main__":
+    main()
 
 
 # print (len(fw))
