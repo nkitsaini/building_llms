@@ -527,7 +527,9 @@ def main():
                     y = y.to(device)
                     with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
                         logits, loss = model(x, y)
-                    val_loss_accum += loss/val_loss_steps
+                    val_loss_accum += (loss/val_loss_steps).detach()
+            if ddp:
+                dist.all_reduce(val_loss_accum, op=dist.ReduceOp.AVG)
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
