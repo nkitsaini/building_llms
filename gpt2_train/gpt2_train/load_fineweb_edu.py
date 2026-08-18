@@ -10,7 +10,7 @@ import random
 from pathlib import Path
 from itertools import batched
 import math
-from .dataset_helpers import get_output_dir
+from .dataset_helpers import get_fineweb_dir
 
 local_dir = "edu_fineweb10B"
 remote_name = "sample-10BT"
@@ -20,7 +20,7 @@ shard_size = int(1e8) # 100M tokens per shard, total of 100 shards
 # download the dataset
 fw = load_dataset("HuggingFaceFW/fineweb-edu", name=remote_name, split="train")
 # %%
-output_dir = get_output_dir()
+output_dir = get_fineweb_dir()
 
 # %%
 
