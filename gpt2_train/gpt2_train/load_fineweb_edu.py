@@ -1,4 +1,5 @@
 # %%
+from typing import Sequence
 import os
 import multiprocessing as mp
 import numpy as np
@@ -35,7 +36,7 @@ idx[:5]
 enc = tiktoken.get_encoding('gpt2')
 eot = enc._special_tokens["<|endoftext|>"]
 
-def tokenize(batch_doc_idxs: iterable[int]):
+def tokenize(batch_doc_idxs: Sequence[int]) -> list[np.ndarray]:
     rv = []
     for doc_idx in batch_doc_idxs:
         text = fw[doc_idx]['text']
@@ -58,19 +59,20 @@ def main():
             print(f"Saving {len(data)} tokens to {filename}")
             np.save(filename, data)
 
-        for tokens in tqdm(pool.imap(tokenize, batched(idx, 100), chunksize=16)):
-            if token_count + len(tokens) < shard_size:
-                all_tokens_np[token_count:token_count + len(tokens)] = tokens
-                token_count += len(tokens)
-            else:
-                assert len(tokens) < shard_size
-                remainder = shard_size - token_count
-                all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
-                write_file(all_tokens_np)
-                token_count = 0
-                shard_index += 1
-                all_tokens_np[0:len(tokens)-remainder] = tokens[remainder:]
-                token_count = len(tokens)-remainder
+        for tokens_batched in tqdm(pool.imap(tokenize, batched(idx, 100), chunksize=16)):
+            for tokens in tokens_batched:
+                if token_count + len(tokens) < shard_size:
+                    all_tokens_np[token_count:token_count + len(tokens)] = tokens
+                    token_count += len(tokens)
+                else:
+                    assert len(tokens) < shard_size
+                    remainder = shard_size - token_count
+                    all_tokens_np[token_count:token_count+remainder] = tokens[:remainder]
+                    write_file(all_tokens_np)
+                    token_count = 0
+                    shard_index += 1
+                    all_tokens_np[0:len(tokens)-remainder] = tokens[remainder:]
+                    token_count = len(tokens)-remainder
         if token_count != 0:
             write_file(all_tokens_np[:token_count])
 
