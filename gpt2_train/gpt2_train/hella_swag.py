@@ -92,3 +92,6 @@ def iterate_examples(split):
         for line in f:
             example = json.loads(line)
             yield example
+
+@torch.no_grad()
+def evaluate(model_type: str, )
