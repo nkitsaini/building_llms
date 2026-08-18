@@ -13,12 +13,20 @@ def get_output_dir() -> Path:
     assert output_dir.exists(), f"Expected {output_dir} to be present"
     return output_dir
 
-def get_hellaswag_dir() -> Path:
-    d =  get_output_dir()/'hellaswag'
+def get_named_dir(name: str) -> Path
+    d =  get_output_dir()/name
     d.mkdir(exist_ok=True)
     return d
 
+
+def get_hellaswag_dir() -> Path:
+    return get_named_dir('hellaswag')
+
 def get_fineweb_dir() -> Path:
-    d = get_output_dir()/'fineweb_edu'
-    d.mkdir(exist_ok=True)
-    return d
+    return get_named_dir('fineweb_edu')
+
+def get_checkpoint_dir() -> Path:
+    return get_named_dir("checkpoint")
+
+def get_log_filepath() -> Path:
+    return get_named_dir("logs")/'logs.jsonl'
