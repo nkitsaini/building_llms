@@ -539,6 +539,7 @@ def main():
                         "val_loss": val_loss_accum,
                         "step": step,
                     }) + "\n")
+
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
