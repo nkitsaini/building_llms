@@ -13,7 +13,7 @@ def get_output_dir() -> Path:
     assert output_dir.exists(), f"Expected {output_dir} to be present"
     return output_dir
 
-def get_named_dir(name: str) -> Path
+def get_named_dir(name: str) -> Path:
     d =  get_output_dir()/name
     d.mkdir(exist_ok=True)
     return d
