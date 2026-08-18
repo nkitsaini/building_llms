@@ -287,7 +287,8 @@ class FineWebDataLoaderLite:
         data_root = get_fineweb_dir()
         shards = list(data_root.iterdir())
         shards = [s for s in shards if split in s.name]
-        shards = sorted(shards)
+        self.shards = sorted(shards)
+        assert len(shards) > 0, f"no shards found for split {split}"
 
 
         self.data = load_dataset()
