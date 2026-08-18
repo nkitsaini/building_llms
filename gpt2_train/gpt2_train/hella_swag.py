@@ -74,7 +74,9 @@ def render_example(example):
         tokens[i, :len(tok_row)] = torch.tensor(tok_row)
         mask[i, :len(mask_row)] = torch.tensor(mask_row)
 
-    return (data, # dict
+    return (
+        data, # dict
         tokens, # tensor(4, max_len) => ctx + option + pad (pad=000)
         mask, # tensor(4, max_len) =>   000 + 111111 + 000
-        label,)
+        label, # `int` correct answer index
+    )
