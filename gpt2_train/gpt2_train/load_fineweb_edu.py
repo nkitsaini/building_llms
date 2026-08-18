@@ -65,6 +65,8 @@ with mp.Pool() as pool:
             shard_index += 1
             all_tokens_np[0:len(tokens)-remainder] = tokens[remainder:]
             token_count = len(tokens)-remainder
+    if token_count != 0:
+        write_file(all_tokens_np[:token_count])
 
 
 
