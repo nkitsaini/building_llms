@@ -121,3 +121,11 @@ def evaluate(model_type: str, device: str):
 
         sum_loss = masked_shift_losses.sum(dim=1) # [B]
         avg_loss = sum_loss / shift_mask.sum(dim=1) # [B]
+
+        pred = sum_loss.argmin().item()
+        pred_norm = avg_loss.argmin().item()
+
+        num_total += 1
+        num_correct += int(pred == label)
+        num_correct_norm += int(pred_norm == label)
+        print(f"{num_total} acc_norm: {num_correct_norm}/{num_total}={num_correct_norm/num_total:.4f}")
