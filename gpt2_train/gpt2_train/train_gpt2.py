@@ -513,14 +513,16 @@ def main():
     # optimizer =torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), eps=1e-8)  # ty: ignore[unresolved-attribute]
     for step in range(max_steps):
 
+        last_step = step == max_steps -1
 
-        if step % 250 == 0:
+        if step % 250 == 0 or last_step:
             model.eval()  # ty: ignore[unresolved-attribute]
             val_loader.reset()
-            for batch_idx in range(300):
-                x, y = train_loader.next_batch()
-                x = x.to(device)
-                y = y.to(device)
+            with torch.no_grad():
+                for batch_idx in range(300):
+                    x, y = train_loader.next_batch()
+                    x = x.to(device)
+                    y = y.to(device)
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
