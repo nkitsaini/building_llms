@@ -44,3 +44,34 @@ def download(split: str):
         download_file(data_url, data_filepath)
     else:
         print(f"File {data_filepath} already exists for split {split} from {data_url}")
+def render_example(example):
+    ctx = example["ctx"]
+    label = example["label"]
+    endings = example["endings"]
+
+    data = {
+        "label": label, # split
+        "ctx_tokens": None, # setup
+        "ending_tokens": [], # options
+    }
+
+    # gather up all the tokens
+    ctx_tokens = enc.encode(ctx)
+    data["ctx_tokens"] = ctx_tokens
+    tok_rows = []
+    mask_rows = []
+    for end in endings:
+        end_tokens = enc.encode(" " + end) # note: prepending " " because GPT-2 tokenizer
+        tok_rows.append(ctx_tokens + end_tokens)
+        mask_rows.append([0]*len(ctx_tokens) + [1]*len(end_tokens))
+        data["ending_tokens"].append(end_tokens)
+
+    # have to be careful during the collation because the number of tokens in each row can differ
+    max_len = max(len(row) for row in tok_rows)
+    tokens = torch.zeros((4, max_len), dtype=torch.long)
+    mask = torch.zeros((4, max_len), dtype=torch.long)
+    for i, (tok_row, mask_row) in enumerate(zip(tok_rows, mask_rows)):
+        tokens[i, :len(tok_row)] = torch.tensor(tok_row)
+        mask[i, :len(mask_row)] = torch.tensor(mask_row)
+
+    return data, tokens, mask, label
