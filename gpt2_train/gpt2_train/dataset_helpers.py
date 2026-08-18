@@ -12,7 +12,7 @@ def get_output_dir() -> Path:
         output_dir = Path(os.getcwd()) / 'gpt2_train'/'dataset'
     return output_dir
 
-def get_helloswag_dir() -> Path:
+def get_hellaswag_dir() -> Path:
     return get_output_dir()/'hello_swag'
 
 def get_fineweb_dir() -> Path:

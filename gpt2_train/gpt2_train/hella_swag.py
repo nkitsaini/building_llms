@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from transformers import GPT2LMHeadModel
-from .dataset_helpers import get_helloswag_dir
+from .dataset_helpers import get_hellaswag_dir
 
 
-output_dir = get_helloswag_dir()
+output_dir = get_hellaswag_dir()
