@@ -558,7 +558,7 @@ def main():
 
     # total_batch_size = 524288 # (2^19)
     total_batch_size = 589824  # 12 * 1024 * (2^4 * 3)
-    B = 8  # micro batch size
+    B = 8  # micro batch size (make as large as possible on device, doesn't affect quality)
     T = 1024  # sequence length
 
     assert total_batch_size % (B * T * ddp_world_size) == 0, (
