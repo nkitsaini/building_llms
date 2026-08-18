@@ -452,9 +452,12 @@ torch.set_float32_matmul_precision("high")
 
 max_lr = 6e-4
 min_lr = max_lr * 0.1
+
+## for shakespear
 # max_steps = 50
 # warmup_steps = 10
 
+## for fineweb (in accordance with gpt 2 training)
 max_steps = 19073
 warmup_steps = 715
 
