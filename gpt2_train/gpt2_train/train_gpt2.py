@@ -452,9 +452,11 @@ torch.set_float32_matmul_precision("high")
 
 max_lr = 6e-4
 min_lr = max_lr * 0.1
-max_steps = 50
-warmup_steps = 10
+# max_steps = 50
+# warmup_steps = 10
 
+max_steps = 19073
+warmup_steps = 10
 
 def get_lr(it: int):
 
