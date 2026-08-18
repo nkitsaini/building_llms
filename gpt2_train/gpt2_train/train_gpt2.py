@@ -536,8 +536,8 @@ def main():
                 log_file = get_log_filepath()
                 with open(log_file, "a") as f:
                     f.write(json.dumps({
-                        "val_loss": val_loss_accum
-                        "step": val_loss_accum
+                        "val_loss": val_loss_accum,
+                        "step": step,
                     }) + "\n")
             model.train()  # ty: ignore[unresolved-attribute]
             ...
