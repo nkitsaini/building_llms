@@ -31,6 +31,11 @@ class GPTConfig:
     n_head: int = 12
     n_embd: int = 768
 
+master_process = True
+
+def log(*args, **kwargs):
+    if master_process:
+        print(*args, **kwargs)
 
 class CasualSelfAttention(nn.Module):
     def __init__(self, config: GPTConfig):
@@ -289,6 +294,7 @@ class FineWebDataLoaderLite:
         shards = [s for s in shards if split in s.name]
         self.shards = sorted(shards)
         assert len(shards) > 0, f"no shards found for split {split}"
+        log(f"found {len(shards)} shards for split {split}")
 
 
         self.data = load_dataset()
