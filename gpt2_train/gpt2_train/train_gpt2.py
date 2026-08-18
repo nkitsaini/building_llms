@@ -516,6 +516,7 @@ def main():
 
         if step % 250 == 0:
             model.eval()  # ty: ignore[unresolved-attribute]
+            val_loader.reset()
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
