@@ -29,6 +29,7 @@ from torch.distributed import init_process_group, destroy_process_group
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from .dataset_helpers import get_fineweb_dir, get_hellaswag_dir, get_log_filepath, get_checkpoint_dir
+from .hella_swag import render_example, iterate_examples
 
 
 @dataclass
@@ -500,8 +501,12 @@ def hella_swag_validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, 
     acc_norm = num_correct_norm / num_total
     if master_process:
         print(f"HellaSwag accuracy: {num_correct_norm}/{num_total}={acc_norm:.4f}")
+        log_file = get_log_filepath()
         with open(log_file, "a") as f:
-            f.write(f"{step} hella {acc_norm:.4f}\n")
+            f.write(json.dumps({
+                "step": step,
+                "acc_norm": acc_norm
+            }) + "\n")
 
 def validate(*, val_loader: FineWebDataLoaderLite, model, raw_model, step: int):
     ## ========= Validation loss
