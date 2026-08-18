@@ -9,6 +9,7 @@ from tqdm import tqdm # pip install tqdm
 import random
 from pathlib import Path
 from itertools import batched
+import math
 
 local_dir = "edu_fineweb10B"
 remote_name = "sample-10BT"
@@ -59,7 +60,9 @@ def main():
             print(f"Saving {len(data)} tokens to {filename}")
             np.save(filename, data)
 
-        for tokens_batched in tqdm(pool.imap(tokenize, batched(idx, 100), chunksize=16)):
+        proc_inputs = batched(idx, 100)
+        proc_input_count = math.ceil(len(idx)//100)
+        for tokens_batched in tqdm(pool.imap(tokenize, proc_inputs, chunksize=16), total=proc_input_count):
             for tokens in tokens_batched:
                 if token_count + len(tokens) < shard_size:
                     all_tokens_np[token_count:token_count + len(tokens)] = tokens
