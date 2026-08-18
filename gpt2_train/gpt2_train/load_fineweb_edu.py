@@ -7,6 +7,7 @@ from datasets import load_dataset # pip install datasets
 from tqdm import tqdm # pip install tqdm
 import random
 from pathlib import Path
+from itertools import batched
 
 local_dir = "edu_fineweb10B"
 remote_name = "sample-10BT"
@@ -34,14 +35,17 @@ idx[:5]
 enc = tiktoken.get_encoding('gpt2')
 eot = enc._special_tokens["<|endoftext|>"]
 
-def tokenize(doc_idx: int):
-    text = fw[doc_idx]['text']
-    tokens = [eot]
-    tokens.extend(enc.encode_ordinary(text))
-    tokens_np = np.array(tokens)
-    assert (0 <= tokens_np).all() and (tokens_np < 2**16).all(), "token dictionary too large for uint16"
-    tokens_np_uint16 = tokens_np.astype(np.uint16)
-    return tokens_np_uint16
+def tokenize(batch_doc_idxs: iterable[int]):
+    rv = []
+    for doc_idx in batch_doc_idxs:
+        text = fw[doc_idx]['text']
+        tokens = [eot]
+        tokens.extend(enc.encode_ordinary(text))
+        tokens_np = np.array(tokens)
+        assert (0 <= tokens_np).all() and (tokens_np < 2**16).all(), "token dictionary too large for uint16"
+        tokens_np_uint16 = tokens_np.astype(np.uint16)
+        rv.append(tokens_np_uint16)
+    return rv
 
 def main():
     with mp.Pool() as pool:
@@ -54,7 +58,7 @@ def main():
             print(f"Saving {len(data)} tokens to {filename}")
             np.save(filename, data)
 
-        for tokens in tqdm(pool.imap(tokenize, idx, chunksize=16)):
+        for tokens in tqdm(pool.imap(tokenize, batched(idx, 100), chunksize=16)):
             if token_count + len(tokens) < shard_size:
                 all_tokens_np[token_count:token_count + len(tokens)] = tokens
                 token_count += len(tokens)
