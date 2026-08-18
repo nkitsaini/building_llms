@@ -533,6 +533,7 @@ def main():
             if master_process:
                 log(f"validation loss: {val_loss_accum.item():.4f}")
                 with open(log_file, "a"):
+                    log_file.write()
             model.train()  # ty: ignore[unresolved-attribute]
             ...
         start = time.time()
