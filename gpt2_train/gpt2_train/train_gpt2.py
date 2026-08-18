@@ -20,6 +20,7 @@ import inspect
 from torch.distributed import init_process_group, destroy_process_group
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
+from .dataset_helpers import get_fineweb_dir, get_hellaswag_dir
 
 
 @dataclass
@@ -283,6 +284,7 @@ class FineWebDataLoaderLite:
         self.num_processes = num_processes
         self.split = split
 
+        self.data_root = get_fineweb_dir()
         self.data = load_dataset()
         enc = tiktoken.get_encoding("gpt2")
         self.tokens = torch.tensor(enc.encode(self.data.content))
