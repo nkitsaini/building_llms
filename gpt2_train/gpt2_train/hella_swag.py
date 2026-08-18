@@ -95,3 +95,6 @@ def iterate_examples(split):
 
 @torch.no_grad()
 def evaluate(model_type: str, device: str):
+    torch.set_float32_matmul_precision('high') # use tf32
+    model = GPT2LMHeadModel.from_pretrained(model_type)
+    model.to(device)
